@@ -46,5 +46,7 @@ I have a near endless todo list that i have set aside for now so that i can achi
     - rust shell
     - python shell
     - flutter shell
+- need a waybar widget for power profile
+- bluetooth widget also necesary now
  
 *Current daily driver is Fedora/KDE*
