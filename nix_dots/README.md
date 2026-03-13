@@ -11,14 +11,13 @@
 I use pywall for themeing my system. The terminal and waybar are the only things that pull colors from it's cache though. I did not want things changing too much with the wallpapers.
 
 Clicking on the gallery icon in the waybar opens a rofi window where you can select an image from the defined wallpaper folder. It is powered by Hyprpaper. The colors change immediately along with the wallpaper. (probably wont upload my wallpapers folder as some are slightly sketch and this repo is public lol)
-![wallpaper picker](nix_dots/assets/nitch.png)
+![wallpaper picker](https://github.com/kelrt/dotfiles/blob/master/nix_dots/assets/nitch.png)
 
 I use cmus for my music playing needs. I got the config from u/imnitwit a while back. Here is the original [post](https://www.reddit.com/r/cmus/comments/ghw9m0/i_made_a_cmus_theme/).
-![cmus display](/assets/cmus.png)
-![cmus displaytest](https://github.com/kelrt/dotfiles/blob/master/nix_dots/assets/cmus.png)
+![cmus display](https://github.com/kelrt/dotfiles/blob/master/nix_dots/assets/cmus.png)
 
 This is my rofi launcher.
-![rofi launcher](/assets/rofi.png)
+![rofi launcher](https://github.com/kelrt/dotfiles/blob/master/nix_dots/assets/rofi.png)
 
 >I do not use home manager. I am happy with my hierarchy at the moment and dont plan on implementing it anytime soon.
 
