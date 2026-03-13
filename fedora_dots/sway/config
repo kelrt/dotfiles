@@ -1,0 +1,215 @@
+# -------------------------------
+# ------- SwayWM Configs --------
+# -------------------------------
+
+# --- Anti-KDE settings ---
+# optimizing KDE/GTK apps for sway
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway DISPLAY SWAYSOCK
+exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+
+# kills kde stuff
+exec pkill kded6
+exec pkill kaccess
+
+
+### --- VARIABLES ---
+set $mod Mod4
+#set $mod alt
+floating_modifier $mod normal
+set $left h
+set $down j
+set $up k
+set $right l
+set $term foot
+set $menu wofi --show drun
+set $GTK_USE_PORTAL 1
+
+
+
+### --- OUTPUT CONFIGURATION (MONITORS & WALLPAPER) ---
+
+# Wallpaper
+output * bg /home/relz/Pictures/wallpapers/snowfrst.png fill
+
+# Primary Monitor (external, 120Hz) - only applies when connected
+output DP-1 {
+    mode 2560x1440@240Hz
+    pos 0 0
+    adaptive_sync on
+}
+
+### --- INPUT CONFIGURATION ---
+input * {
+    xkb_layout "us"
+    accel_profile flat # Raw input for gaming
+}
+
+
+
+#### OPTIONS FOR FUN60 ULTRA KEYBOARD START: ####
+
+input type:keyboard {
+    xkb_options ctrl:swapcaps,altwin:swap_lalt_lwin
+}
+
+# Used to bind the Menu key (between the r-ctrl and fn keys)
+#bindsym Menu exec foot #(not too useful, just used as an example for future reference lol)
+
+
+
+#### FUN60 SETTINGS END ####
+
+
+
+
+### --- KEY BINDINGS ---
+# Apps
+bindsym $mod+Return exec $term
+bindsym $mod+d exec $menu
+bindsym $mod+Shift+q kill
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+e exec swaynag -t warning -m 'Exit Sway?' -B 'Yes' 'swaymsg exit'
+    # scratchpads
+bindsym $mod+b [class="Bitwarden"] scratchpad show
+bindsym $mod+p [class="Parsify"] scratchpad show
+bindsym $mod+t [app_id="Todoist"] scratchpad show
+
+# Navigation
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+
+# Moving Windows
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
+
+# Workspaces
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+
+# Move to Workspace
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+0 move container to workspace number 10
+
+# Layout
+# bindsym $mod+b splith
+# bindsym $mod+v splitv
+# bindsym $mod+s layout stacking
+# bindsym $mod+w layout tabbed
+# bindsym $mod+e layout toggle split
+bindsym $mod+f fullscreen
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+
+# Scratchpad
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
+
+# --- RESIZING ---
+mode "resize" {
+    bindsym $left resize shrink width 10px
+    bindsym $down resize grow height 10px
+    bindsym $up resize shrink height 10px
+    bindsym $right resize grow width 10px
+
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+# --- SCREENSHOTS ---
+# 1. Mod+Shift+i: Select area to clipboard (no freeze)
+bindsym $mod+Shift+i exec grim -g "$(slurp)" - | wl-copy
+# 2. Mod+i: Select area to clipboard (uses wayfreeze)
+bindsym $mod+i exec sh -c 'wayfreeze & PID=$!; sleep 0.1; grim -g "$(slurp)" - | wl-copy; kill $PID'
+
+
+# Lock Screen
+bindsym $mod+Escape exec ~/.local/bin/lock-screen.sh
+
+### --- STATUS BAR ---
+bar {
+    swaybar_command waybar
+}
+
+### --- AUTOSTART COMMANDS ---
+
+# 1. KEYRING & POLKIT (The Fix)
+# Starts GNOME Keyring and exports variables so WiFi/Apps can find it.
+exec eval $(gnome-keyring-daemon --start --components=pkcs11,secrets)
+
+# Starts the Admin Password Popup
+exec /usr/bin/lxpolkit
+
+# 2. Autotiling
+exec_always ~/.local/bin/autotiling
+
+# 3. Notification Daemon
+exec mako
+
+# 4. Network Manager Applet
+exec nm-applet --indicator
+
+# 5. Idle Manager
+exec swayidle -w \
+    timeout 300 '~/.local/bin/lock-screen.sh' \
+    timeout 600 'swaymsg "output * power off"' \
+    resume 'swaymsg "output * power on"' \
+    before-sleep '~/.local/bin/lock-screen.sh'
+
+# 6. Starts the portal that allows calls to open file manager afaik
+#exec /usr/libexec/xdg-desktop-portal-gtk
+
+# 7. Force Qt Apps to use the custom theme
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY
+#XDG_CURRENT_DESKTOP
+#QT_QPA_PLATFORMTHEME=qt6ct
+
+# 8. chinese keyboard setup
+exec --no-startup-id fcitx5 -d
+
+# 9. starup applications
+
+# Autolaunch Apps
+# exec flatpak run one.ablaze.floorp
+exec flatpak run librewolf
+exec flatpak run com.todoist.Todoist
+
+exec /home/relz/Applications/parsify.AppImage
+exec flatpak run com.bitwarden.desktop
+for_window [app_id="bonsai_term"] floating enable, border pixel 2, resize set 1000 800, move position center
+exec swaymsg 'workspace number 2; exec foot -a bonsai_term fish -C "cbonsai -l -t 0.01"'
+
+# Send them to the scratchpad immediately on launch
+# for_window [app_id="chrome-dlgohinmglaoopaiplliaecdpmnepmga-Default"] move scratchpad
+for_window [app_id="Todoist"] move scratchpad
+for_window [class="Parsify"] move scratchpad
+for_window [class="Bitwarden"] move scratchpad
+
+
+# Prompt for SSH key via GUI on boot
+exec ssh-add ~/.ssh/id_ed25519 < /dev/null

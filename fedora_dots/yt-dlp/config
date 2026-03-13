@@ -1,0 +1,3 @@
+-P ~/Downloads
+-o %(title)s.%(ext)s
+--cookies-from-browser firefox

@@ -1,0 +1,102 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: monospace;
+    font-size: 13px;
+    min-height: 0;
+}
+
+window#waybar {
+    background: #242424;
+    color: #ffffff;
+    border-bottom: 2px solid #ffffff;
+}
+
+#workspaces button {
+padding: 0 10px;
+background: transparent;
+color: #ffffff;
+border-bottom: 3px solid transparent;
+}
+
+#workspaces button.focused {
+background: #64727D;
+border-bottom: 3px solid #ffffff;
+}
+
+#workspaces button.urgent {
+background-color: #eb4d4b;
+}
+
+#mode {
+background-color: #64727D;
+border-bottom: 3px solid #ffffff;
+}
+
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#network,
+#pulseaudio,
+#custom-media,
+#tray,
+#mode,
+#idle_inhibitor,
+#mpd {
+padding: 0 10px;
+margin: 0 4px;
+color: #ffffff;
+}
+
+#clock {
+font-weight: bold;
+}
+
+#battery.charging, #battery.plugged {
+color: #26A65B;
+}
+
+#battery.critical:not(.charging) {
+background-color: #f53c3c;
+color: #ffffff;
+}
+
+label:focus {
+    background-color: #000000;
+}
+
+#custom-productivity {
+padding: 0 10px;
+border-radius: 4px;
+margin: 2px 4px;
+}
+
+#custom-productivity.work {
+background: #458588;
+color: #ebdbb2;
+}
+
+#custom-productivity.break,
+#custom-productivity.workout {
+background: #b8bb26;
+color: #1d2021;
+}
+
+#custom-productivity.paused {
+background: #d79921;
+color: #1d2021;
+}
+
+#custom-journal {
+    font-family: monospace, "Font Awesome 6 Free";
+}
+
+#pulseaudio {
+    font-family: monospace, "Font Awesome 6 Free";
+    padding-left: 5px;
+    padding-right: 5px;
+}

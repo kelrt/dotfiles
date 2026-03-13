@@ -1,0 +1,99 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 30,
+    "modules-left": ["sway/workspaces", "sway/mode"],
+    "modules-center": ["clock", "custom/journal"],
+    "modules-right": ["group/drawer"],
+
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "format": "{name}"
+    },
+
+    "clock": {
+        "format": "{:%a %b %d  %I:%M %p}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>"
+    },
+
+    "group/drawer": {
+        "orientation": "horizontal",
+        "drawer": {
+            "transition-duration": 300,
+            "transition-to-left": true,
+            "click-to-reveal": true
+        },
+        "modules": [
+            "custom/drawer-toggle",
+            "tray",
+            "idle_inhibitor",
+	        "custom/wall-picker",
+            "pulseaudio",
+            "custom/easyeffects",
+            "custom/logout"
+        ]
+    },
+
+    "custom/easyeffects": {
+        "format": "🎚️ ",
+        "on-click": "easyeffects",
+        "tooltip-format": "Open EasyEffects"
+    },
+
+    "custom/journal": {
+        "format": "",
+        "on-click": "~/.config/waybar/scripts/daily_journal.sh",
+        "tooltip-format": "Open the journal entry txt file for the day"
+    },
+
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    },
+
+    "custom/drawer-toggle": {
+        "format": "◀",
+        "tooltip-format": "Click to expand"
+    },
+
+"pulseaudio": {
+        "format": "{icon}",
+        "format-bluetooth": "🎧",
+        "format-muted": "🔇",
+        "format-source": "🎤 {volume}%",
+        "format-source-muted": "🎤 Muted",
+        "tooltip-format": "Output: {volume}%\nInput: {format_source}",
+        "format-icons": {
+            "headphone": "🎧",
+            "hands-free": "🎧",
+            "headset": "🎧",
+            "phone": "📱",
+            "portable": "📱",
+            "car": "🚗",
+            "default": ["🔈", "🔉", "🔊"]
+        },
+        "on-click": "pavucontrol"
+    },
+
+    "tray": {
+        "icon-size": 21,
+        "spacing": 10
+    },
+
+    "custom/wall-picker": {
+    		"format": "  ",
+    		"tooltip-format": "Pick a Wallpaper",
+    		"exec": "echo ''",
+    		"on-click": "~/.config/waybar/scripts/wallpaper-picker.sh"
+	},
+
+    "custom/logout": {
+        "format": " ",
+        "tooltip-format": "WIP! need to bind the command to this button"
+    }
+
+}
