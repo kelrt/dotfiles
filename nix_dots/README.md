@@ -49,4 +49,5 @@ I have a near endless todo list that i have set aside for now so that i can achi
 - need a waybar widget for power profile
 - bluetooth widget also necesary now
  
-*Current daily driver is Fedora/KDE*
+*Current daily driver is Fedora/KDE* (13-3-2026)
+Refer to those dotfiles for most up to date configs
