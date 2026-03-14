@@ -2,7 +2,7 @@ if status is-interactive
     # Kali distrobox
     alias kali='distrobox enter --root kali --'
     alias ksudo='distrobox enter --root kali -- sudo'
-    
+
     alias timer='~/.config/waybar/scripts/productivity-timer.sh'
 
     # Shorter common commands
@@ -25,10 +25,13 @@ set -gx SDL_IM_MODULE fcitx
 set -gx GLFW_IM_MODULE ibus
 
 
-# --- Development Workflow ---
 
-# Project Jump Shortcut
+# --- Development Tools ---
+
+# Jump Shortcut for code projects
 abbr -a c cd ~/Projects/code/
+#jump shortcut for git commit
+abbr -a gcm --set-cursor 'git commit -m "%"'
 
 # Automated Environment Loading
 if type -q direnv
@@ -38,7 +41,7 @@ end
 # Helper to create isolated No-CoW Python environments
 function mkvirtual
     python -m venv .venv
-    sudo chattr +C .venv 
+    sudo chattr +C .venv
     echo "layout python" > .envrc
     direnv allow
     echo "Isolated environment ready."
@@ -50,6 +53,8 @@ set -g fish_greeting
 
 set -x CHROME_EXECUTABLE ~/.local/bin/chrome-wayland.sh
 abbr -a frun "flutter run -d chrome"
+
+
 
 # --- SSH Agent Configuration ---
 # Point to the stable systemd OpenSSH agent
