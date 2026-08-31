@@ -86,6 +86,7 @@
       "custom/drawer-toggle",
       "idle_inhibitor",
       "pulseaudio",
+      "custom/maintenance",
       "custom/wallpicker"
     ]
   },
@@ -154,5 +155,11 @@
   "tray": {
     "icon-size": 21,
     "spacing": 10
+  },
+  "custom/maintenance": {
+    "format": "🛠️u",
+    "on-click": "~/.config/waybar/scripts/maintenance.sh",
+    "tooltip": true,
+    "tooltip-format": "Run DNF, Flatpak, and Push Dotfiles"
   }
 }
