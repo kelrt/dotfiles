@@ -1,0 +1,25 @@
+### --- THINKPAD T14 GEN 4 TOP ROW ---
+
+# F1 - F4: Audio Controls
+bindsym XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && light-helper --mute
+bindsym XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- && light-helper --volume
+bindsym XF86AudioRaiseVolume exec wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+ && light-helper --volume
+bindsym XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+
+# F5 - F6: Brightness Controls
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%- && light-helper --brightness
+bindsym XF86MonBrightnessUp exec brightnessctl set 5%+ && light-helper --brightness
+# F7: External Display (Uncomment and add a display manager like wdisplays if wanted)
+bindsym XF86Display exec wdisplays
+
+# F8: Airplane Mode / Wi-Fi Toggle
+# bindsym XF86WLAN exec rfkill toggle all
+
+
+# F9 - F11: Settings, Bluetooth, and Keyboard (Left unassigned for now)
+bindsym XF86NotificationCenter exec fcitx5-remote -t
+# bindsym XF86Bluetooth exec playerctl play-pause
+# bindsym XF86Keyboard exec playerctl next
+
+# F12: Custom Star Key
+#bindsym XF86Favorites exec ~/.local/bin/sony-toggle.sh

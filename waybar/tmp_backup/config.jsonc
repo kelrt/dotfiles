@@ -1,0 +1,145 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 30,
+    "spacing": 3,
+    "modules-left": ["sway/workspaces", "sway/scratchpad", "sway/mode"],
+    "modules-center": ["clock",  "group/drawer"],
+    "modules-right": [ "tray", "battery", "group/music"],
+
+
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "format": "{name}"
+    },
+
+    "clock": {
+        "format": "{:%a %b %d  %I:%M %p}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>"
+    },
+
+
+    "group/music": {
+        "orientation": "horizontal",
+        "drawer": {
+            "transition-duration": 500,
+            "transition-left-to-right": false
+        },
+        "modules": [
+            "custom/music-icon",
+            "mpris"
+        ]
+    },
+    "sway/scratchpad": {
+        "format": "{icon} {count}",
+        "show-empty": false,
+        "format-icons": ["", ""],
+        "tooltip": true,
+        "tooltip-format": "{app}: {title}"
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    },
+    "custom/music-icon": {
+        "format": "🎵",
+        "tooltip": false
+    },
+
+    "mpris": {
+    "format": "{dynamic} {status_icon}",
+    "dynamic-order": ["title"],
+    "tooltip-format": "{title}\nArtist: {artist}\nAlbum: {album}\nTime: {position} / {length}\nPlayer: {player}",
+    "status-icons": {
+        "playing": "⏸",
+        "paused": "▶",
+        "stopped": "⏹"
+    },
+    "max-length": 40
+},
+
+    "group/drawer": {
+        "orientation": "horizontal",
+        "drawer": {
+            "transition-duration": 300,
+            "transition-to-left": true,
+            "click-to-reveal": true
+        },
+        "modules": [
+            "custom/drawer-toggle",
+            "idle_inhibitor",
+            "pulseaudio",
+            "custom/wallpicker"
+        ]
+    },
+
+    "custom/drawer-toggle": {
+        "format": "  ",
+        "tooltip-format": "Click to expand"
+    },
+
+    "custom/wallpicker": {
+        "format": "",
+        "tooltip-format": "Left: Wofi menu\nRight: Random wallpaper\nMiddle: Edit wal_tester.sh",
+        "on-click": "/home/relz/.config/waybar/scripts/wal_tester.sh",
+        "on-click-right": "/home/relz/.config/waybar/scripts/random_wall.sh",
+        "on-click-middle": "foot nvim /home/relz/.config/waybar/scripts/wal_tester.sh" 
+    },
+
+    "battery": {
+        "states": {
+            // "good": 95,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{capacity}% {icon}",
+        "format-full": "{capacity}% {icon}",
+        "format-charging": "{capacity}% ",
+        "format-plugged": "{capacity}% ",
+        "format-alt": "{time} {icon}",
+        // "format-good": "", // An empty format will hide the module
+        // "format-full": "",
+        "format-icons": ["", "", "", "", ""]
+    },
+
+    "pulseaudio": {
+        // "scroll-step": 1, // %, can be a float
+        "format": "{volume}% {icon} {format_source}",
+        //"format-bluetooth": "{volume}% {icon} {format_source}",
+        //"format-bluetooth-muted": " {icon} {format_source}",
+        "format-muted": " {format_source}",
+        "format-source": "{volume}% ",
+        "format-source-muted": "",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol"
+    },
+
+    "power-profiles-daemon": {
+      "format": "{icon}",
+      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+      "tooltip": true,
+      "format-icons": {
+        "default": "",
+        "performance": "",
+        "balanced": "",
+        "power-saver": ""
+      }
+    },
+
+    "tray": {
+        "icon-size": 21,
+        "spacing": 10
+    }
+}

@@ -1,0 +1,100 @@
+@import "colors.css";
+
+* {
+    border: none;
+    font-family: monospace;
+    font-size: 14px;
+    min-height: 0;
+}
+
+/* Translucent, color-matched background for the whole bar */
+window#waybar {
+    background-color: alpha(@surface, 0); 
+    color: @on_surface;
+    /*border-left: 1px solid alpha(@outline, 0.3);*/
+    border: none;
+}
+
+/* Base pill-shape rule for all bubbles */
+#workspaces, #scratchpad, #mode, #clock, #battery, #pulseaudio, #tray, #idle_inhibitor, #custom-wallpicker, #custom-drawer-toggle {
+    border-radius: 16px;
+    padding: 10px 0;
+    margin: 4px 2px;
+}
+
+/* GROUP 1: Workspaces (Primary Color) */
+#workspaces, #scratchpad, #mode {
+    background-color: alpha(@primary_container, 0.4);
+    border: 1px solid alpha(@primary_container, 0.7);
+    color: @on_primary_container;
+}
+
+#workspaces button {
+    padding: 10px 0;
+    background: transparent;
+    color: @on_primary_container;
+    font-weight: bold;
+    border-left: 3px solid transparent;
+}
+
+#workspaces button.focused {
+    background: @primary;
+    color: #000000;
+    font-weight: bold;
+    border-left: 3px solid @primary;
+}
+
+#workspaces button.urgent {
+    background-color: #eb4d4b;
+    color: #ffffff;
+}
+
+/* GROUP 2: Clock & Drawer (Tertiary Color) */
+#clock, #custom-drawer-toggle {
+    background-color: alpha(@tertiary_container, 0.4);
+    border: 1px solid alpha(@tertiary_container, 0.7);
+    color: @on_tertiary_container;
+}
+
+#clock {
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: none;
+    padding: 8px 4px;
+}
+
+/* GROUP 3: Media & Idle (Secondary Color) */
+#mpris, #idle_inhibitor {
+    background-color: alpha(@secondary_container, 0.4);
+    border: 1px solid alpha(@secondary_container, 0.7);
+    color: @on_secondary_container;
+}
+
+/* GROUP 4: System Info (Surface Variant) */
+#battery, #pulseaudio, #tray {
+    background-color: alpha(@surface_variant, 0.6);
+    border: 1px solid alpha(@outline, 0.4);
+    color: @on_surface;
+}
+
+#battery.charging, #battery.plugged {
+    color: #26A65B;
+}
+
+#battery.critical:not(.charging) {
+    background-color: #f53c3c;
+    color: #ffffff;
+}
+
+/* GROUP 5: Wallpicker Button */
+#custom-wallpicker {
+    background-color: alpha(@primary, 0.4);
+    border: 1px solid alpha(@primary, 0.7);
+    color: @on_primary_container;
+}
+
+#group-music, #mpris {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}

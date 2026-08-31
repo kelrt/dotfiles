@@ -1,0 +1,9 @@
+[config.wallpaper]
+# Matugen demands a command string here to pass validation, even if we disable it
+command = "echo {image}" 
+set = false
+
+[templates.waybar]
+input_path = "/home/relz/.config/matugen/templates/waybar-colors.css"
+output_path = "/home/relz/.config/waybar/colors.css"
+post_hook = "killall -SIGUSR2 waybar"
