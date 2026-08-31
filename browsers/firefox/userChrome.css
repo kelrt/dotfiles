@@ -1,0 +1,42 @@
+/*CODE TO HID THE SIDEBERY HEADER AND HIDE TOPSIDE HORIZONTAL TABS:*/
+
+#TabsToolbar {
+	visibility: collapse !important;
+}
+
+#sidebar-box #sidebar-header {
+	display:none !important;
+}
+
+
+
+
+/*CODE TO MANAGE THE HIDE/REVEAL OF THE URL BAR:*/
+
+/* Hide top nav bar by default, expand on hover or focus */
+#navigator-toolbox {
+  position: relative;
+  z-index: 100;
+}
+
+#nav-bar {
+  /* Height when collapsed */
+  margin-top: -38px !important;
+  opacity: 0 !important;
+  transition: all 0.2s cubic-bezier(0.1, 0.7, 0.1, 1) !important;
+  pointer-events: none !important;
+}
+
+/* Show on hover over top area or when focused (Ctrl+L / Alt+D) */
+#navigator-toolbox:hover #nav-bar,
+#nav-bar:focus-within {
+  margin-top: 0px !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Optional: Keep tabs toolbar visible if you aren't hiding native tabs */
+#TabsToolbar {
+  position: relative !important;
+  z-index: 101 !important;
+}
