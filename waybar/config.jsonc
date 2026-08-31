@@ -157,7 +157,7 @@
     "spacing": 10
   },
   "custom/maintenance": {
-    "format": "🛠️u",
+    "format": "🛠️",
     "on-click": "~/.config/waybar/scripts/maintenance.sh",
     "tooltip": true,
     "tooltip-format": "Run DNF, Flatpak, and Push Dotfiles"
