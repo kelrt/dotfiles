@@ -20,3 +20,10 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # Alias l -> ls -al
 alias l='ls -al'
 alias nv="nvim"
+
+gacp() {
+  git add .
+  # Uses the first argument as the message, or defaults to "Update" if left blank
+  git commit -m "${1:-Update}"
+  git push
+}
