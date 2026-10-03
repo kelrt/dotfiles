@@ -17,7 +17,6 @@ source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # Add Cargo binaries to PATH
 export PATH="$HOME/.cargo/bin:$PATH"
 
-# Alias l -> ls -al
 alias l='ls -al'
 alias nv="nvim"
 
@@ -26,4 +25,8 @@ gacp() {
   # Uses the first argument as the message, or defaults to "Update" if left blank
   git commit -m "${1:-Update}"
   git push
+}
+
+open() {
+    xdg-open "$@" >/dev/null 2>&1 &!
 }
