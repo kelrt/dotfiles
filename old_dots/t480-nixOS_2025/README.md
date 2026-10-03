@@ -14,10 +14,10 @@ Clicking on the gallery icon in the waybar opens a rofi window where you can sel
 ![wallpaper picker](https://github.com/kelrt/dotfiles/blob/master/old_dots/t480-nixOS_2025/assets/nitch.png)
 
 I use cmus for my music playing needs. I got the config from u/imnitwit a while back. Here is the original [post](https://www.reddit.com/r/cmus/comments/ghw9m0/i_made_a_cmus_theme/).
-![cmus display](https://github.com/kelrt/dotfiles/blob/master/nix_dots/assets/cmus.png)
+![cmus display](https://github.com/kelrt/dotfiles/blob/master/old_dots/t480-nixOS_2025/assets/cmus.png)
 
 This is my rofi launcher.
-![rofi launcher](https://github.com/kelrt/dotfiles/blob/master/nix_dots/assets/rofi.png)
+![rofi launcher](https://github.com/kelrt/dotfiles/blob/master/old_dots/t480-nixOS_2025/assets/rofi.png)
 
 >I do not use home manager. I am happy with my hierarchy at the moment and dont plan on implementing it anytime soon.
 
