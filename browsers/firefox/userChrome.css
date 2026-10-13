@@ -1,42 +1,120 @@
-/*CODE TO HID THE SIDEBERY HEADER AND HIDE TOPSIDE HORIZONTAL TABS:*/
+/* ==========================================================================
+   userChrome.css
+   Minimal Firefox UI for use with Sidebery. Checked against Firefox 157.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   SETTINGS: the values you are most likely to tweak
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Toolbar colour. Any CSS colour works: #hex, rgb(), or a colour name. */
+  --uc-toolbar-color: #d0d0d7;
+
+  /* How far the URL bar slides up when hidden. This leaves a thin strip at
+     the top of the window to hover over; go any further and there is nothing
+     left to hover. */
+  --uc-navbar-offset: -39px;
+}
+
+
+/* --------------------------------------------------------------------------
+   COLOURS
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* The URL bar row, and the gaps around the sidebar and page */
+  --toolbar-background-color: var(--uc-toolbar-color) !important;
+
+  /* The window frame behind the toolbars (focused and unfocused window) */
+  --toolbox-background-color: var(--uc-toolbar-color) !important;
+  --toolbox-background-color-inactive: var(--uc-toolbar-color) !important;
+
+  /* Only needed if you pick a dark toolbar colour: uncomment these so the
+     text and icons stay readable. */
+  /* --toolbar-text-color: #fbfbfe !important; */
+  /* --toolbox-text-color: #fbfbfe !important; */
+}
+
+
+/* --------------------------------------------------------------------------
+   NATIVE TAB BAR: hidden, Sidebery handles tabs
+   -------------------------------------------------------------------------- */
 
 #TabsToolbar {
-	visibility: collapse !important;
-}
-
-#sidebar-box #sidebar-header {
-	display:none !important;
+  visibility: collapse !important;
 }
 
 
+/* --------------------------------------------------------------------------
+   SIDEBAR
+   -------------------------------------------------------------------------- */
+
+/* Header above Sidebery. #sidebar-panel-header is the current one; it lives
+   inside the sidebar's own document, so it must not be prefixed with
+   #sidebar-box or #main-window. #sidebar-header is the old one, only used if
+   sidebar.revamp is set to false. */
+#sidebar-panel-header,
+#sidebar-header {
+  display: none !important;
+}
+
+/* Stock Firefox sidebar launcher (icon strip) and its resize handle */
+#sidebar-container,
+#sidebar-launcher-splitter {
+  display: none !important;
+}
+
+/* Border and rounded corners around the sidebar panel */
+#sidebar-box {
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+#sidebar-box #sidebar {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Resize handle between the sidebar and the page. Overlaps the page edge so
+   it takes up no room, but can still be dragged. */
+#sidebar-splitter {
+  border: none !important;
+  margin-inline-end: calc(-1 * var(--splitter-width)) !important;
+}
+
+/* Square off the page's top corners where they meet the sidebar.
+   Delete this rule to get the rounded corners back. */
+#tabbrowser-tabpanels > :not(.split-view-panel) .browserContainer {
+  border-start-start-radius: 0 !important;
+  border-start-end-radius: 0 !important;
+}
 
 
-/*CODE TO MANAGE THE HIDE/REVEAL OF THE URL BAR:*/
+/* --------------------------------------------------------------------------
+   AUTO-HIDING URL BAR
+   -------------------------------------------------------------------------- */
 
-/* Hide top nav bar by default, expand on hover or focus */
 #navigator-toolbox {
   position: relative;
   z-index: 100;
 }
 
+/* Hidden by default */
 #nav-bar {
-  /* Height when collapsed */
-  margin-top: -38px !important;
+  margin-top: var(--uc-navbar-offset) !important;
   opacity: 0 !important;
-  transition: all 0.2s cubic-bezier(0.1, 0.7, 0.1, 1) !important;
   pointer-events: none !important;
+  transition: all 0.2s cubic-bezier(0.1, 0.7, 0.1, 1) !important;
 }
 
-/* Show on hover over top area or when focused (Ctrl+L / Alt+D) */
+/* Shown when hovering the top edge, or when focused (Ctrl+L / Alt+D) */
 #navigator-toolbox:hover #nav-bar,
 #nav-bar:focus-within {
-  margin-top: 0px !important;
+  margin-top: 0 !important;
   opacity: 1 !important;
   pointer-events: auto !important;
-}
-
-/* Optional: Keep tabs toolbar visible if you aren't hiding native tabs */
-#TabsToolbar {
-  position: relative !important;
-  z-index: 101 !important;
 }

@@ -10,7 +10,8 @@
   ],
   "modules-center": [
     "clock",
-    "group/drawer"
+    "group/drawer",
+    "network#vpn"
   ],
   "modules-right": [
     "tray",
@@ -23,11 +24,26 @@
     "format": "{name}",
     "rotate": 270
   },
+  
   "clock": {
     "format": "{:%H\n%M}",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>",
-    "rotate": 360
+    "calendar": {
+        "mode": "month",
+        "format": {
+            "months": "<span color='#ffffff'><b>{}</b></span>",
+            "days": "<span color='#ffffff'><b>{}</b></span>",
+            "weeks": "<span color='#99ccff'><b>W{}</b></span>",
+            "weekdays": "<span color='#cccccc'><b>{}</b></span>",
+            "today": "<span color='#eb4d4b' background='#2b2b2b'><b><u>{}</u></b></span>"
+        }
+    },
+    "actions": {
+        "on-click": "shift_down",
+        "on-click-right": "shift_up"
+    }
   },
+  
   "group/music": {
     "orientation": "vertical",
     "drawer": {
@@ -94,6 +110,12 @@
     "format": "",
     "tooltip-format": "Click to expand"
   },
+"network#vpn": {
+    "interface": "vpn-*",
+    "format": "",
+    "format-disconnected": "",
+    "tooltip-format": "{ifname}: {ipaddr}"
+},
   "custom/wallpicker": {
     "format": "",
     "tooltip-format": "Left: Wofi menu\nRight: Random wallpaper\nMiddle: Edit wal_tester.sh",

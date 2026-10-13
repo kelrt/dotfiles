@@ -11,6 +11,8 @@ set $menu wofi --show drun
 
 include includes/*
 
+#maybe fixes the thunar launch from browser issues?
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 
 default_border pixel 1
 default_floating_border pixel 1
@@ -63,6 +65,7 @@ exec swayidle -w \
 exec nm-applet --indicator
 exec ~/.cargo/bin/mprisence
 exec fcitx5 -d
+exec sleep 2 && blueman-applet
 
 # --- Custom Overrides ---
 # Remove the top gap globally, overriding any included system defaults

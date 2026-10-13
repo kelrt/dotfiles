@@ -30,3 +30,10 @@ gacp() {
 open() {
     xdg-open "$@" >/dev/null 2>&1 &!
 }
+
+# bun completions
+[ -s "/home/relz/.bun/_bun" ] && source "/home/relz/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
