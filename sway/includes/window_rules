@@ -16,3 +16,20 @@ for_window [class="Thunar" title=".*Rename.*"] floating enable
 for_window [window_role="pop-up"] floating enable
 for_window [window_role="dialog"] floating enable
 for_window [window_type="dialog"] floating enable
+
+
+# --- scratchpad apps ---
+for_window [class="bitwarden"]  mark bw,   floating enable, resize set 900 650, move scratchpad
+for_window [app_id="todoist"]   mark todo, floating enable, resize set 1000 700, move scratchpad
+for_window [app_id="calcpad"]   mark calc, floating enable, resize set 450 550, move scratchpad
+
+# autolaunch
+exec flatpak run com.bitwarden.desktop
+exec flatpak run com.todoist.Todoist
+exec $HOME/.cargo/bin/parse
+
+# keys
+#bindsym $mod+minus scratchpad show
+#bindsym $mod+b [con_mark="bw"]   scratchpad show
+#bindsym $mod+t [con_mark="todo"] scratchpad show
+#bindsym $mod+c [con_mark="calc"] scratchpad show

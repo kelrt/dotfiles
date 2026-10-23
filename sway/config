@@ -54,11 +54,11 @@ bar {
 
 ### --- IDLE MANAGEMENT ---
 exec swayidle -w \
-    timeout 300 'pidof hyprlock || hyprlock &' \
+    timeout 300 'pid of hyprlock || hyprlock &' \
     timeout 330 'swaymsg "output * dpms off"' \
     resume 'swaymsg "output * dpms on"' \
     timeout 500 'systemctl suspend' \
-    before-sleep 'pidof hyprlock || hyprlock'
+    before-sleep 'pid of hyprlock || hyprlock'
 
     
 

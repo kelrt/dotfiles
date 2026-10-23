@@ -68,9 +68,10 @@ mode "resize" {
 }
 bindsym $mod+r mode "resize"
 
-### --- SCREENSHOTS ---
-# Print Screen: Freeze screen, select area, and copy to clipboard
-bindsym Print exec sh -c '~/.cargo/bin/wayfreeze & PID=$!; sleep 0.2; grim -g "$(slurp)" - | wl-copy; kill $PID'
+## --- SCREENSHOTS ---
+#Print Screen: Freeze screen, select area, and copy to clipboard
+#bindsym Print exec sh -c '~/.cargo/bin/wayfreeze & PID=$!; sleep 0.2; grim -g "$(slurp)" - | wl-copy; kill $PID'
+bindsym Print exec ~/.local/bin/shot-debug.sh
 
-# Right-Control + Print Screen: Freeze screen, select area, and save directly to Downloads
+#Right-Control + Print Screen: Freeze screen, select area, and save directly to Downloads
 bindsym Ctrl+Print exec sh -c '~/.cargo/bin/wayfreeze & PID=$!; sleep 0.2; grim -g "$(slurp)" ~/Downloads/screenshot-$(date +%Y-%m-%d-%H%M%S).png; kill $PID'
