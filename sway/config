@@ -19,7 +19,7 @@ default_floating_border pixel 1
 smart_gaps on
 
 ### --- OUTPUT CON=+FIGURATION (MONITORS & WALLPAPER) ---
-output * bg /home/relz/Pictures/wallpapers/clouds.png fill
+output * bg /home/relz/Pictures/wallpapers/clouds_2.png fill
 
 output HDMI-A-1 {
     mode  2560x1440@60Hz
