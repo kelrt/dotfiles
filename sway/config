@@ -43,6 +43,7 @@ input type:pointer {
 
 input type:keyboard {
     xkb_layout "us"
+    #comment out the next line when using HHKB
     xkb_options "ctrl:swapcaps,altwin:swap_alt_win"
 }
 
@@ -54,11 +55,11 @@ bar {
 
 ### --- IDLE MANAGEMENT ---
 exec swayidle -w \
-    timeout 300 'pid of hyprlock || hyprlock &' \
+    timeout 300 'pidof hyprlock || hyprlock &' \
     timeout 330 'swaymsg "output * dpms off"' \
     resume 'swaymsg "output * dpms on"' \
     timeout 500 'systemctl suspend' \
-    before-sleep 'pid of hyprlock || hyprlock'
+    before-sleep 'pidof hyprlock || hyprlock'
 
     
 
@@ -66,6 +67,7 @@ exec nm-applet --indicator
 exec ~/.cargo/bin/mprisence
 exec fcitx5 -d
 exec sleep 2 && blueman-applet
+exec /usr/libexec/lxqt-policykit-agent
 
 # --- Custom Overrides ---
 # Remove the top gap globally, overriding any included system defaults
