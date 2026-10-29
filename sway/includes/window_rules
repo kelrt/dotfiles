@@ -18,6 +18,11 @@ for_window [window_role="dialog"] floating enable
 for_window [window_type="dialog"] floating enable
 
 
+
+# Translucent Windows 
+for_window [app_id=com.microsoft.VSCode] opacity 0.97
+
+
 # --- scratchpad apps ---
 #for_window [class="bitwarden"]  mark bw,   floating enable, resize set 900 650, move scratchpad
 #for_window [app_id="todoist"]   mark todo, floating enable, resize set 1000 700, move scratchpad
