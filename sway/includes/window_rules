@@ -32,6 +32,9 @@ for_window [app_id="calcpad"]   mark calc, floating enable, resize set 450 550, 
 exec flatpak run com.bitwarden.desktop
 exec flatpak run com.todoist.Todoist
 exec $HOME/.cargo/bin/parse
+exec python3 ~/.config/sway/scripts/inactive-windows-transparency.py -o 0.9 -g
+exec python3 ~/.config/sway/scripts/autotiling.py
+
 
 # keys
 bindsym $mod+p [con_mark="calc"] scratchpad show
