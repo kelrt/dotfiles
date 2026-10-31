@@ -24,9 +24,10 @@ for_window [app_id=com.microsoft.VSCode] opacity 0.97
 
 
 # --- scratchpad apps ---
-#for_window [class="bitwarden"]  mark bw,   floating enable, resize set 900 650, move scratchpad
+for_window [class="bitwarden"]  mark bw,   floating enable, resize set 1350 950, move scratchpad
 #for_window [app_id="todoist"]   mark todo, floating enable, resize set 1000 700, move scratchpad
 for_window [app_id="calcpad"]   mark calc, floating enable, resize set 450 550, move scratchpad
+for_window [app_id="mousepad" title="notes\.txt"] mark notes, floating enable, resize set 900 650, move scratchpad
 
 # autolaunch
 exec flatpak run com.bitwarden.desktop
@@ -34,7 +35,10 @@ exec flatpak run com.todoist.Todoist
 exec $HOME/.cargo/bin/parse
 exec python3 ~/.config/sway/scripts/inactive-windows-transparency.py -o 0.9 -g
 exec python3 ~/.config/sway/scripts/autotiling.py
+exec mousepad /home/relz/Documents/notes.txt
 
 
 # keys
-bindsym $mod+p [con_mark="calc"] scratchpad show
+bindsym $mod+c [con_mark="calc"]  scratchpad show
+bindsym $mod+n [con_mark="notes"] scratchpad show
+bindsym $mod+b [con_mark="bw"]    scratchpad show
