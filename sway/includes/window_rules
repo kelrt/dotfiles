@@ -27,7 +27,7 @@ for_window [app_id=com.microsoft.VSCode] opacity 0.97
 for_window [class="bitwarden"]  mark bw,   floating enable, resize set 1350 950, move scratchpad
 #for_window [app_id="todoist"]   mark todo, floating enable, resize set 1000 700, move scratchpad
 for_window [app_id="calcpad"]   mark calc, floating enable, resize set 450 550, move scratchpad
-for_window [app_id="mousepad" title="notes\.txt"] mark notes, floating enable, resize set 900 650, move scratchpad
+for_window [app_id="mousepad" title="notes\.txt"] mark notes, floating enable, resize set 650 600, move scratchpad
 
 # autolaunch
 exec flatpak run com.bitwarden.desktop
