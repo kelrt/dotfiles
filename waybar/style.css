@@ -16,7 +16,7 @@ window#waybar {
 }
 
 /* Base pill-shape rule for all bubbles */
-#workspaces, #scratchpad, #mode, #clock, #battery, #pulseaudio, #tray, #idle_inhibitor, #custom-wallpicker, #custom-drawer-toggle, #custom-maintenance {
+#workspaces, #scratchpad, #mode, #clock, #battery, #pulseaudio, #tray, #idle_inhibitor, #custom-wallpicker, #custom-drawer-toggle, #custom-maintenance, #custom-claude {
     border-radius: 16px;
     padding: 10px 0;
     margin: 4px 2px;
@@ -99,7 +99,7 @@ window#waybar {
     box-shadow: none;
 }
 
-#custom-maintenance {
+#custom-maintenance, #custom-claude {
     background-color: alpha(@secondary_container, 0.4);
     border: 1px solid alpha(@secondary_container, 0.7);
     color: @on_secondary_container;

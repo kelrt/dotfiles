@@ -103,7 +103,8 @@
       "idle_inhibitor",
       "pulseaudio",
       "custom/maintenance",
-      "custom/wallpicker"
+      "custom/wallpicker",
+      "custom/claude"
     ]
   },
   "custom/drawer-toggle": {
@@ -183,5 +184,10 @@
     "on-click": "~/.config/waybar/scripts/maintenance.sh",
     "tooltip": true,
     "tooltip-format": "Run DNF, Flatpak, and Push Dotfiles"
+  },
+  "custom/claude": {
+    "format": "",
+    "tooltip-format": "Claude Code in ~/.config",
+    "on-click": "foot -D /home/relz/.config /home/relz/.local/bin/claude"
   }
 }
