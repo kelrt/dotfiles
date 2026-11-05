@@ -16,7 +16,7 @@ window#waybar {
 }
 
 /* Base pill-shape rule for all bubbles */
-#workspaces, #scratchpad, #mode, #clock, #battery, #pulseaudio, #tray, #idle_inhibitor, #custom-wallpicker, #custom-drawer-toggle, #custom-maintenance, #custom-claude {
+#workspaces, #scratchpad, #mode, #clock, #battery, #pulseaudio, #tray, #idle_inhibitor, #custom-wallpicker, #custom-drawer-toggle, #custom-maintenance, #custom-claude, #custom-rust {
     border-radius: 16px;
     padding: 10px 0;
     margin: 4px 2px;
@@ -103,6 +103,20 @@ window#waybar {
     background-color: alpha(@secondary_container, 0.4);
     border: 1px solid alpha(@secondary_container, 0.7);
     color: @on_secondary_container;
+}
+
+/* Rust practice module: bright red until today's goal is met */
+#custom-rust.pending {
+    background-color: #e01b24;
+    border: 1px solid #e01b24;
+    color: #000000;
+}
+
+/* Done: same matugen bubble as the Claude button, muted Claude-orange icon */
+#custom-rust.done {
+    background-color: alpha(@secondary_container, 0.4);
+    border: 1px solid alpha(@secondary_container, 0.7);
+    color: #b8765e;
 }
 
 

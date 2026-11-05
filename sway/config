@@ -44,7 +44,7 @@ input type:pointer {
 input type:keyboard {
     xkb_layout "us"
     #comment out the next line when using HHKB
-    xkb_options "ctrl:swapcaps,altwin:swap_alt_win"
+    #xkb_options "ctrl:swapcaps,altwin:swap_alt_win"
 }
 
 
