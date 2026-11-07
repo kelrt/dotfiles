@@ -1,0 +1,264 @@
+// SIDE: a full bar on the left, hidden until you rest the pointer on the screen
+// edge. It carries what your current bar does (Rust, Claude, wallpaper, maintenance, VPN)
+// plus the lab's extras. Run it with ../try side, because reveal.py opens and closes it.
+{
+  "layer": "overlay",
+  "position": "left",
+  "width": 64, // BAR_WIDTH in reveal.py must match
+  "exclusive": false,
+  "spacing": 0,
+  "reload_style_on_change": true,
+
+  // reveal.py sends these signals. "modes" isn't in the man page, but waybar 0.14 reads it.
+  // "invisible" stays drawn so style.css can slide the bar away, and it sits on the top
+  // layer so a hidden bar is never drawn over fullscreen windows.
+  "start_hidden": true,
+  "on-sigusr1": "show",
+  "on-sigusr2": "hide",
+  "mode": "dock",
+  "modes": {
+    "dock": { "layer": "overlay", "exclusive": false, "passthrough": false, "visible": true },
+    "invisible": { "layer": "top", "exclusive": false, "passthrough": true, "visible": true }
+  },
+
+  "modules-left": [
+    "custom/launcher",
+    "sway/workspaces",
+    "sway/mode",
+    "image#calc",
+    "image#notes",
+    "image#bitwarden",
+    "custom/scratchpad"
+  ],
+  "modules-center": ["clock", "custom/rust"],
+  // Alerts stay outside the drawer. They only appear when there is something to see.
+  "modules-right": [
+    "privacy",
+    "custom/reboot",
+    "systemd-failed-units",
+    "group/drawer",
+    "battery"
+  ],
+
+  // Click the toggle to open or close. It opens upward, so the toggle stays under the pointer.
+  "group/drawer": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 220,
+      "transition-left-to-right": false,
+      "click-to-reveal": true
+    },
+    "modules": [
+      "custom/drawer-toggle",
+      "custom/music",
+      "tray",
+      "network",
+      "network#vpn",
+      "bluetooth",
+      "group/sound",
+      "group/light",
+      "power-profiles-daemon",
+      "custom/charge",
+      "inhibitor",
+      "custom/wallpicker",
+      "custom/maintenance",
+      "custom/claude",
+      "custom/power"
+    ]
+  },
+  "custom/drawer-toggle": {
+    "format": "",
+    "tooltip-format": "Click for controls"
+  },
+
+  "custom/launcher": {
+    "format": "",
+    "tooltip-format": "Apps",
+    "on-click": "~/.config/wofi/menu --show drun --sort-order alphabetical"
+  },
+  "sway/workspaces": { "disable-scroll": true, "all-outputs": true, "format": "{name}" },
+  // The three scratchpad apps, same as $mod+c, $mod+n and $mod+b. The marks are set in
+  // sway/includes/window_rules. The second line of "exec" is the tooltip.
+  "image#calc": {
+    "exec": "printf '%s\\n%s\\n' /usr/share/icons/AdwaitaLegacy/48x48/legacy/accessories-calculator.png Calculator",
+    "size": 28,
+    "on-click": "swaymsg -q '[con_mark=\"calc\"] scratchpad show'"
+  },
+  "image#notes": {
+    "exec": "printf '%s\\n%s\\n' /usr/share/icons/hicolor/96x96/apps/org.xfce.mousepad.png Notes",
+    "size": 28,
+    "on-click": "swaymsg -q '[con_mark=\"notes\"] scratchpad show'"
+  },
+  "image#bitwarden": {
+    "exec": "printf '%s\\n%s\\n' /var/lib/flatpak/exports/share/icons/hicolor/64x64/apps/com.bitwarden.desktop.png Bitwarden",
+    "size": 28,
+    "on-click": "swaymsg -q '[con_mark=\"bw\"] scratchpad show'"
+  },
+  // Empty unless something else is in the scratchpad. Click to bring that window back.
+  "custom/scratchpad": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/scratchpad-others",
+    "return-type": "json",
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/scratchpad-others show"
+  },
+  "sway/mode": { "format": "{}", "rotate": 270 },
+  // The script sends the Rust logo, which your current bar still uses. This shows a crab and
+  // keeps the script's colours and tooltip.
+  "custom/rust": {
+    "exec": "/home/relz/dev/Learning/Rust/tutor/scripts/rust-status.sh",
+    "return-type": "json",
+    "format": "🦀",
+    "interval": 30,
+    "signal": 8,
+    "on-click": "/home/relz/dev/Learning/Rust/tutor/scripts/rust-session.sh"
+  },
+
+  "privacy": {
+    "icon-size": 15,
+    "modules": [{ "type": "screenshare" }, { "type": "audio-in" }]
+  },
+  "custom/reboot": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/reboot-needed",
+    "return-type": "json",
+    "interval": 600
+  },
+  "systemd-failed-units": {
+    "hide-on-ok": true,
+    "format": " {nr_failed}",
+    "system": true,
+    "user": true
+  },
+  // A separate process, unlike waybar's mpris module, so a player bug cannot crash the bar.
+  "custom/music": {
+    "exec": "playerctl --follow metadata --format '{{ artist }} - {{ title }}'",
+    "exec-if": "command -v playerctl",
+    "restart-interval": 10,
+    "format": "",
+    "hide-empty-text": true,
+    "tooltip-format": "{}",
+    "escape": true,
+    "on-click": "playerctl play-pause",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous"
+  },
+  "tray": { "icon-size": 18, "spacing": 8 },
+
+  "network": {
+    "format-wifi": "",
+    "format-ethernet": "",
+    "format-disconnected": "",
+    "tooltip-format-wifi": "{essid} at {signalStrength}%\n{signaldBm} dBm, {frequency} GHz\n{ipaddr}",
+    "tooltip-format-ethernet": "{ifname}\n{ipaddr}",
+    "tooltip-format-disconnected": "Not connected",
+    "on-click": "nm-connection-editor"
+  },
+  "network#vpn": {
+    "interface": "vpn-*",
+    "format": "",
+    "format-disconnected": "",
+    "tooltip-format": "{ifname}: {ipaddr}"
+  },
+  "bluetooth": {
+    "format": "",
+    "format-connected": "",
+    "format-connected-battery": "",
+    "tooltip-format": "Bluetooth {status}",
+    "tooltip-format-connected": "{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}",
+    "tooltip-format-enumerate-connected-battery": "{device_alias}: {device_battery_percentage}%",
+    "on-click": "blueman-manager"
+  },
+
+  // The slider opens above the icon, so the icon stays still under the pointer.
+  "group/sound": {
+    "orientation": "inherit",
+    "drawer": { "transition-duration": 180, "transition-left-to-right": false },
+    "modules": ["pulseaudio", "pulseaudio/slider"]
+  },
+  "pulseaudio": {
+    "format": "{icon}\n<small>{volume}</small>",
+    "format-muted": "\n<small>mute</small>",
+    "format-icons": { "default": ["", "", ""], "headphone": "" },
+    "justify": "center",
+    "scroll-step": 5,
+    "max-volume": 100,
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-click-right": "pavucontrol"
+  },
+  "pulseaudio/slider": { "min": 0, "max": 100, "orientation": "vertical" },
+  "group/light": {
+    "orientation": "inherit",
+    "drawer": { "transition-duration": 180, "transition-left-to-right": false },
+    "modules": ["backlight", "backlight/slider"]
+  },
+  "backlight": {
+    "format": "\n<small>{percent}</small>",
+    "justify": "center",
+    "tooltip-format": "Brightness {percent}%",
+    "on-scroll-up": "brightnessctl -q set 5%+",
+    "on-scroll-down": "brightnessctl -q set 5%-"
+  },
+  "backlight/slider": { "min": 1, "max": 100, "orientation": "vertical" },
+
+  // Click for the next profile. tuned-ppd keeps this up to date, so it needs no polling.
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "tooltip-format": "Power profile: {profile}\nClick for the next one",
+    "format-icons": {
+      "default": "",
+      "performance": "",
+      "balanced": "",
+      "power-saver": ""
+    }
+  },
+  "custom/charge": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/charge-limit",
+    "return-type": "json",
+    "interval": 10,
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/charge-limit toggle"
+  },
+  "inhibitor": {
+    "what": ["idle", "sleep"],
+    "format": "{icon}",
+    "format-icons": { "activated": "", "deactivated": "" },
+    "tooltip-format-activated": "Keeping the laptop awake. Click to allow sleep.",
+    "tooltip-format-deactivated": "Normal sleep. Click to keep awake."
+  },
+
+  "custom/wallpicker": {
+    "format": "",
+    "tooltip-format": "Left: Wofi menu\nRight: Random wallpaper\nMiddle: Edit wal_tester.sh",
+    "on-click": "/home/relz/.config/waybar/scripts/wal_picker.sh",
+    "on-click-right": "/home/relz/.config/waybar/scripts/random_wall.sh",
+    "on-click-middle": "foot nvim /home/relz/.config/waybar/scripts/wal_picker.sh"
+  },
+  "custom/maintenance": {
+    "format": "",
+    "tooltip-format": "Run DNF, Flatpak, and Push Dotfiles",
+    "on-click": "~/.config/waybar/scripts/maintenance.sh"
+  },
+  "custom/claude": {
+    "format": "",
+    "tooltip-format": "Claude Code in ~/.config",
+    "on-click": "foot -D /home/relz/.config /home/relz/.local/bin/claude"
+  },
+
+  "battery": {
+    "states": { "warning": 20, "critical": 10 },
+    "format": "{icon}\n<small>{capacity}%</small>",
+    "format-charging": "\n<small>{capacity}%</small>",
+    "format-plugged": "\n<small>{capacity}%</small>",
+    "format-icons": ["", "", "", "", ""],
+    "justify": "center",
+    "tooltip-format": "{timeTo}\n{power} W, health {health}%, {cycles} cycles"
+  },
+  "clock": {
+    "format": "{:%H\n%M}",
+    "justify": "center",
+    "tooltip-format": "{:%A %B %d}\n<tt>{calendar}</tt>"
+  },
+  "custom/power": {
+    "format": "",
+    "tooltip-format": "Suspend, reboot...",
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/power-menu"
+  }
+}

@@ -1,0 +1,71 @@
+@import url("../shared/lab.css");
+
+* {
+    /* Name the text font first: Font Awesome has letter glyphs but no punctuation. */
+    font-family: "Noto Sans Mono", "Font Awesome 6 Free", "Font Awesome 6 Brands", monospace;
+    font-size: 12.5px;
+}
+
+window#waybar {
+    background: alpha(@surface, 0.94);
+    border-top: 1px solid alpha(@outline, 0.3);
+}
+
+#custom-battery,
+#custom-sensors,
+#custom-profile,
+#custom-charge,
+#inhibitor,
+#cpu,
+#memory,
+#disk,
+#network,
+#systemd-failed-units,
+#clock {
+    padding: 0 10px;
+    border-right: 1px solid alpha(@outline, 0.18);
+}
+
+#custom-battery {
+    font-weight: bold;
+    color: @primary;
+}
+
+#custom-battery.Charging,
+#custom-battery.Full {
+    color: #9ed99b;
+}
+
+#custom-battery.warning {
+    color: #ffb86b;
+}
+
+#custom-battery.critical {
+    background: #eb4d4b;
+    color: #ffffff;
+}
+
+#custom-reboot {
+    color: #ffb86b;
+    padding: 0 10px;
+    border-right: 1px solid alpha(@outline, 0.18);
+}
+
+#custom-sensors {
+    color: @tertiary;
+    border: none;
+}
+
+#custom-sensors.warm {
+    color: #ffb86b;
+}
+
+#custom-sensors.hot {
+    color: #eb4d4b;
+    font-weight: bold;
+}
+
+#clock {
+    border: none;
+    font-weight: bold;
+}

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Waybar button: the same choices as $mod+Shift+e. Locking is alt+l.
+choice=$(printf 'Suspend\nLog Out\nReboot\nPower Off\n' | ~/.config/wofi/menu --dmenu --hide-search --lines 4 --width 220)
+case $choice in
+Suspend) systemctl suspend ;;
+"Log Out") swaymsg exit ;;
+Reboot) systemctl reboot ;;
+"Power Off") systemctl poweroff ;;
+esac

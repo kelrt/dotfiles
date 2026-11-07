@@ -1,0 +1,76 @@
+// POWER: an instrument panel for energy and heat.
+// Use it for a day to learn what actually drains the battery. Hover anything for detail.
+{
+  "layer": "top",
+  "position": "bottom",
+  "height": 28,
+  "spacing": 0,
+  "reload_style_on_change": true,
+
+  "modules-left": ["custom/battery", "custom/profile", "custom/charge", "inhibitor"],
+  "modules-center": ["custom/sensors"],
+  "modules-right": ["cpu", "memory", "disk", "network", "custom/reboot", "systemd-failed-units", "clock"],
+
+  "custom/battery": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/battery-detail",
+    "return-type": "json",
+    "format": "  {}"
+  },
+  "custom/sensors": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/sensors",
+    "return-type": "json",
+    "format": "  {}"
+  },
+  "custom/profile": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/power-profile",
+    "return-type": "json",
+    "interval": 5,
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/power-profile cycle"
+  },
+  "custom/charge": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/charge-limit",
+    "return-type": "json",
+    "interval": 10,
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/charge-limit toggle"
+  },
+  "inhibitor": {
+    "what": ["idle", "sleep"],
+    "format": "{icon}",
+    "format-icons": { "activated": "", "deactivated": "" },
+    "tooltip-format-activated": "Keeping the laptop awake. Click to allow sleep.",
+    "tooltip-format-deactivated": "Normal sleep. Click to keep awake."
+  },
+
+  "cpu": { "interval": 3, "format": " {usage}%" },
+  "memory": {
+    "interval": 5,
+    "format": " {used:0.1f}G",
+    "tooltip-format": "{used:0.1f} of {total:0.1f} GiB used\nSwap {swapUsed:0.1f} of {swapTotal:0.1f} GiB"
+  },
+  "disk": {
+    "interval": 60,
+    "path": "/",
+    "format": " {free}",
+    "tooltip-format": "{used} of {total} used on {path}"
+  },
+  "network": {
+    "interval": 3,
+    "format-wifi": " {signaldBm} dBm  {bandwidthDownBytes}",
+    "format-ethernet": " {bandwidthDownBytes}",
+    "format-disconnected": "",
+    "tooltip-format-wifi": "{essid} at {frequency} GHz\nDown {bandwidthDownBytes}, up {bandwidthUpBytes}\n{ipaddr}",
+    "tooltip-format-ethernet": "{ifname}\n{ipaddr}"
+  },
+  "custom/reboot": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/reboot-needed",
+    "return-type": "json",
+    "interval": 600
+  },
+  "systemd-failed-units": {
+    "hide-on-ok": true,
+    "format": " {nr_failed}",
+    "system": true,
+    "user": true
+  },
+  "clock": { "format": "{:%H:%M}", "tooltip-format": "<tt>{calendar}</tt>" }
+}

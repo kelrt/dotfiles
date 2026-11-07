@@ -1,0 +1,9 @@
+#!/bin/bash
+# Waybar module: appears only when a newer kernel is installed than the one running.
+running=$(uname -r)
+newest=$(ls -1v /lib/modules | tail -n 1)
+if [[ $newest != "$running" ]]; then
+    printf '{"text":"\\uf021","tooltip":"Reboot to use kernel %s\\nRunning %s","class":"pending"}\n' "$newest" "$running"
+else
+    printf '{"text":""}\n'
+fi

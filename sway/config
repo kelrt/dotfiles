@@ -7,12 +7,12 @@ set $down j
 set $up k
 set $right l
 set $term foot
-set $menu wofi --show drun
+set $menu ~/.config/wofi/menu --show drun --sort-order alphabetical
+
+# Import the session environment and start graphical-session.target first
+exec /usr/libexec/sway-systemd/session.sh
 
 include includes/*
-
-#maybe fixes the thunar launch from browser issues?
-exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 
 default_border pixel 1
 default_floating_border pixel 1
@@ -59,7 +59,7 @@ exec swayidle -w \
     timeout 330 'swaymsg "output * dpms off"' \
     resume 'swaymsg "output * dpms on"' \
     timeout 500 'systemctl suspend' \
-    before-sleep 'pidof hyprlock || hyprlock'
+    before-sleep 'pidof hyprlock || { hyprlock & sleep 1; }'
 
     
 
@@ -68,6 +68,8 @@ exec ~/.cargo/bin/mprisence
 exec fcitx5 -d
 exec sleep 2 && blueman-applet
 exec /usr/libexec/lxqt-policykit-agent
+exec sh ~/.config/sway/scripts/low-battery.sh
+exec python3 ~/.config/waybar/lab/osd/osd.py
 
 # --- Custom Overrides ---
 # Remove the top gap globally, overriding any included system defaults

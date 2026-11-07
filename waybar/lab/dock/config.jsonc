@@ -1,0 +1,63 @@
+// DOCK: a floating, centered dock with an icon for every open app.
+// Click an icon to focus it, middle-click to close it. Everything else stays out of the way.
+{
+  "layer": "top",
+  "position": "bottom",
+  "height": 46,
+  "margin-bottom": 8,
+  "spacing": 6,
+  "reload_style_on_change": true,
+
+  "modules-center": [
+    "custom/launcher",
+    "sway/workspaces",
+    "wlr/taskbar",
+    "custom/now-playing",
+    "battery",
+    "clock",
+    "custom/power"
+  ],
+
+  "custom/launcher": {
+    "format": "",
+    "tooltip-format": "Apps",
+    "on-click": "~/.config/wofi/menu --show drun --sort-order alphabetical"
+  },
+  "sway/workspaces": { "disable-scroll": true, "all-outputs": true, "format": "{name}" },
+  "wlr/taskbar": {
+    "icon-size": 24,
+    "spacing": 4,
+    "tooltip-format": "{title}",
+    "on-click": "activate",
+    "on-click-middle": "close"
+  },
+  "custom/now-playing": {
+    "exec": "playerctl --follow metadata --format '{{ title }}'",
+    "exec-if": "command -v playerctl",
+    "restart-interval": 10,
+    "format": " {}",
+    "escape": true,
+    "max-length": 28,
+    "tooltip": false,
+    "on-click": "playerctl play-pause",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous"
+  },
+  "battery": {
+    "states": { "warning": 20, "critical": 10 },
+    "format": "{icon} {capacity}%",
+    "format-charging": " {capacity}%",
+    "format-plugged": " {capacity}%",
+    "format-icons": ["", "", "", "", ""],
+    "tooltip-format": "{timeTo}\n{power} W, health {health}%, {cycles} cycles"
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "tooltip-format": "{:%A %B %d}\n<tt>{calendar}</tt>"
+  },
+  "custom/power": {
+    "format": "",
+    "tooltip-format": "Lock, suspend, reboot...",
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/power-menu"
+  }
+}

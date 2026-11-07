@@ -1,0 +1,31 @@
+#!/bin/sh
+# Try a lab bar next to your normal one. Nothing here touches your normal bar or sway.
+#   ~/.config/waybar/lab/try quick    everyday top bar with hover sliders
+#   ~/.config/waybar/lab/try power    bottom bar about energy and heat
+#   ~/.config/waybar/lab/try dock     floating centered dock with app icons
+#   ~/.config/waybar/lab/try side     full bar on the left, hidden until you touch the edge
+#   ~/.config/waybar/lab/try osd      just the volume/brightness popup
+# Ctrl+C, or closing the terminal, stops it and leaves no trace.
+LAB=$(dirname "$(readlink -f "$0")")
+
+case $1 in
+quick | power | dock | side) ;;
+osd) exec python3 "$LAB/osd/osd.py" ;;
+*)
+    sed -n '2,8p' "$0" | cut -c3-
+    exit 2
+    ;;
+esac
+
+# Skip the popup if it's already running, for example from sway: two would draw over each other.
+if ! pgrep -f 'python3 .*osd/osd\.py' >/dev/null; then
+    python3 "$LAB/osd/osd.py" &
+    OSD=$!
+    trap 'kill "$OSD" 2>/dev/null' EXIT INT TERM HUP
+fi
+
+if [ "$1" = side ]; then
+    python3 "$LAB/side/reveal.py" waybar -c "$LAB/side/config.jsonc" -s "$LAB/side/style.css"
+else
+    waybar -c "$LAB/$1/config.jsonc" -s "$LAB/$1/style.css"
+fi

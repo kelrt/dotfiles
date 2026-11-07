@@ -1,0 +1,64 @@
+#!/bin/bash
+# Waybar module: battery power and time left, plus stats since you last unplugged.
+# Stays running and prints one JSON line every few seconds. Uses bash builtins only,
+# so it costs almost nothing on battery.
+BAT=/sys/class/power_supply/BAT0
+INTERVAL=4
+avg=0            # smoothed power in mW
+start_en=0       # energy when the charger came off, in uWh
+start_sec=0
+was=""
+
+while :; do
+    read -r st < "$BAT/status"
+    read -r cap < "$BAT/capacity"
+    read -r pw < "$BAT/power_now"
+    read -r en < "$BAT/energy_now"
+    read -r ef < "$BAT/energy_full"
+    read -r ed < "$BAT/energy_full_design"
+    read -r cy < "$BAT/cycle_count"
+
+    mw=$((pw / 1000))
+    if ((avg == 0)); then avg=$mw; fi
+    avg=$(((avg * 3 + mw) / 4))
+    watts="$((avg / 1000)).$(((avg % 1000) / 100))"
+
+    if [[ $st == Discharging && $was != Discharging ]]; then
+        start_en=$en
+        start_sec=$SECONDS
+    fi
+    was=$st
+
+    class=$st
+    case $st in
+    Discharging)
+        mins=0
+        ((avg > 0)) && mins=$((en / 1000 * 60 / avg))
+        text=$(printf '%d%%  %sW  %d:%02d' "$cap" "$watts" $((mins / 60)) $((mins % 60)))
+        ;;
+    Charging)
+        mins=0
+        ((avg > 0)) && mins=$(((ef - en) / 1000 * 60 / avg))
+        text=$(printf '%d%%  +%sW  full in %d:%02d' "$cap" "$watts" $((mins / 60)) $((mins % 60)))
+        ;;
+    *)
+        text="$cap%  on AC"
+        ;;
+    esac
+    if [[ $st == Discharging ]]; then
+        if ((cap <= 10)); then class=critical; elif ((cap <= 20)); then class=warning; fi
+    fi
+
+    health=$((ef * 100 / ed))
+    now_wh="$((en / 1000000)).$(((en % 1000000) / 100000))"
+    full_wh="$((ef / 1000000)).$(((ef % 1000000) / 100000))"
+    tip="$st, $now_wh of $full_wh Wh\nHealth $health% after $cy cycles"
+    if [[ $st == Discharging ]] && ((SECONDS > start_sec)); then
+        used=$((start_en - en))
+        secs=$((SECONDS - start_sec))
+        mean=$((used / 1000 * 3600 / secs / 1000))
+        tip="$tip\nSince unplugged: $((secs / 3600))h$(printf '%02d' $((secs % 3600 / 60)))m, $((used / 1000000)).$(((used % 1000000) / 100000)) Wh used, average ${mean} W"
+    fi
+    printf '{"text":"%s","tooltip":"%s","class":"%s"}\n' "$text" "$tip" "$class"
+    sleep "$INTERVAL"
+done

@@ -1,0 +1,102 @@
+@import url("../shared/lab.css");
+
+.modules-left,
+.modules-center,
+.modules-right {
+    background: alpha(@surface, 0.86);
+    border: 1px solid alpha(@outline, 0.25);
+    border-radius: 14px;
+    padding: 0 8px;
+}
+
+#workspaces,
+#scratchpad,
+#mode,
+#window,
+#clock,
+#custom-now-playing,
+#network,
+#bluetooth,
+#pulseaudio,
+#backlight,
+#battery,
+#custom-profile,
+#custom-charge,
+#inhibitor,
+#tray,
+#custom-power,
+#systemd-failed-units {
+    padding: 0 8px;
+    margin: 4px 0;
+}
+
+#mode {
+    background: @primary;
+    color: @surface;
+    border-radius: 10px;
+}
+
+#window {
+    color: alpha(@on_surface, 0.8);
+}
+
+#clock {
+    font-weight: bold;
+}
+
+#custom-now-playing {
+    color: @tertiary;
+}
+
+#custom-reboot {
+    color: #ffb86b;
+    padding: 0 8px;
+}
+
+#battery.warning:not(.charging) {
+    color: #ffb86b;
+}
+
+#battery.critical:not(.charging) {
+    color: #eb4d4b;
+    font-weight: bold;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: #9ed99b;
+}
+
+#custom-power {
+    color: @primary;
+}
+
+#pulseaudio-slider,
+#backlight-slider {
+    padding: 0 6px;
+}
+
+#pulseaudio-slider slider,
+#backlight-slider slider {
+    min-width: 0;
+    min-height: 0;
+    opacity: 0;
+    background: none;
+    box-shadow: none;
+    border: none;
+}
+
+#pulseaudio-slider trough,
+#backlight-slider trough {
+    min-width: 96px;
+    min-height: 6px;
+    border-radius: 3px;
+    background: alpha(@on_surface, 0.18);
+}
+
+#pulseaudio-slider highlight,
+#backlight-slider highlight {
+    min-height: 6px;
+    border-radius: 3px;
+    background: @primary;
+}

@@ -1,0 +1,225 @@
+/* Absolute, or reload_style_on_change can't follow it to colors.css and the bar won't recolour. */
+@import url("/home/relz/.config/waybar/lab/shared/lab.css");
+
+* {
+    font-size: 15px;
+}
+
+window#waybar > box {
+    margin: 8px 0 8px 8px;
+    padding: 8px 0;
+    background: alpha(@surface, 0.9);
+    border: 1px solid alpha(@outline, 0.3);
+    border-radius: 20px;
+    transition: margin-left 160ms ease-out, margin-right 160ms ease-out, opacity 160ms ease-out;
+}
+
+/* Closed: slid off the left edge. Both side margins change, or the box would only stretch
+   under its fixed-width window. reveal.py switches between this and the rule above. */
+window#waybar.mode-invisible > box {
+    margin-left: -56px;
+    margin-right: 64px;
+    opacity: 0;
+}
+
+#custom-launcher,
+#custom-scratchpad,
+#mode,
+#custom-rust,
+#custom-drawer-toggle,
+#custom-reboot,
+#systemd-failed-units,
+#custom-music,
+#network,
+#bluetooth,
+#pulseaudio,
+#backlight,
+#power-profiles-daemon,
+#custom-charge,
+#inhibitor,
+#custom-wallpicker,
+#custom-maintenance,
+#custom-claude,
+#battery,
+#clock,
+#custom-power {
+    padding: 6px 0;
+    margin: 1px 6px;
+    border-radius: 12px;
+}
+
+#custom-launcher:hover,
+#custom-scratchpad:hover,
+#custom-rust:hover,
+#custom-drawer-toggle:hover,
+#custom-music:hover,
+#network:hover,
+#bluetooth:hover,
+#pulseaudio:hover,
+#backlight:hover,
+#power-profiles-daemon:hover,
+#custom-charge:hover,
+#inhibitor:hover,
+#custom-wallpicker:hover,
+#custom-maintenance:hover,
+#custom-claude:hover,
+#clock:hover,
+#custom-power:hover {
+    background: alpha(@on_surface, 0.12);
+}
+
+#custom-launcher,
+#custom-power {
+    color: @primary;
+}
+
+#custom-launcher {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+/* Workspaces */
+#workspaces {
+    margin: 0 6px;
+}
+
+#workspaces button {
+    padding: 5px 0;
+    margin: 1px 0;
+}
+
+/* Gaps between clusters */
+#network,
+#power-profiles-daemon,
+#custom-wallpicker,
+#battery {
+    margin-top: 7px;
+}
+
+/* Rust status, same meaning as in your current bar. The crab is a colour emoji, so CSS can't
+   recolour it, and a solid red pill would hide it. */
+#custom-rust {
+    font-family: "Noto Color Emoji";
+    font-size: 20px;
+}
+
+#custom-rust.pending {
+    background: alpha(#e01b24, 0.25);
+    box-shadow: inset 0 0 0 2px #e01b24;
+}
+
+#custom-rust.done {
+    opacity: 0.55;
+}
+
+/* Scratchpad apps */
+#image {
+    padding: 4px 0;
+    margin: 2px 6px;
+    border-radius: 12px;
+}
+
+#image.calc {
+    margin-top: 10px;
+}
+
+#image:hover {
+    background: alpha(@on_surface, 0.12);
+}
+
+/* Status and controls */
+#custom-reboot {
+    color: #ffb86b;
+}
+
+#custom-music {
+    color: @tertiary;
+}
+
+/* Any bigger and "90%" no longer fits the bar. */
+#custom-charge {
+    font-size: 11px;
+}
+
+#tray {
+    margin: 4px 0;
+}
+
+#bluetooth.off,
+#bluetooth.disabled {
+    color: alpha(@on_surface, 0.4);
+}
+
+#bluetooth.connected {
+    color: @primary;
+}
+
+#network.disconnected {
+    color: #eb4d4b;
+}
+
+#network.vpn {
+    color: #9ed99b;
+}
+
+#pulseaudio.muted {
+    color: alpha(@on_surface, 0.5);
+}
+
+#power-profiles-daemon.power-saver {
+    color: #9ed99b;
+}
+
+#power-profiles-daemon.performance {
+    color: #ffb86b;
+}
+
+/* Sliders */
+#pulseaudio-slider,
+#backlight-slider {
+    margin: 4px 0;
+}
+
+#pulseaudio-slider trough,
+#backlight-slider trough {
+    min-width: 8px;
+    min-height: 90px;
+    border-radius: 8px;
+    background: alpha(@on_surface, 0.15);
+}
+
+#pulseaudio-slider highlight,
+#backlight-slider highlight {
+    min-width: 8px;
+    border-radius: 8px;
+    background: @primary;
+}
+
+#pulseaudio-slider slider,
+#backlight-slider slider {
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+/* Battery and clock */
+#battery.plugged,
+#battery.charging {
+    color: #9ed99b;
+}
+
+#battery.warning:not(.charging) {
+    color: #ffb86b;
+}
+
+#battery.critical:not(.charging) {
+    color: #eb4d4b;
+}
+
+#clock {
+    font-size: 18px;
+    font-weight: bold;
+}

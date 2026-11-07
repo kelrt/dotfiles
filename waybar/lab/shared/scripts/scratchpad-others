@@ -1,0 +1,32 @@
+#!/bin/bash
+# Waybar module: the scratchpad icon, for windows with no button of their own on the bar.
+# The bar hides this module while the text is empty. It sleeps until sway reports a change.
+#   scratchpad-others        run by the bar
+#   scratchpad-others show   bring back the first of those windows
+# calc, notes and bw are the marks sway/includes/window_rules gives the apps with buttons.
+others() {
+    swaymsg -t get_tree | jq -c '[.. | objects | select(.name? == "__i3_scratch") | .floating_nodes[]
+        | select(any(.marks[]?; . == "calc" or . == "notes" or . == "bw") | not)]'
+}
+
+status() {
+    others | jq -c 'if length == 0 then {text: ""} else {
+        text: " \(length)",
+        tooltip: (map((.app_id // .window_properties.class // "Window") + ": " + (.name // "") | @html) | join("\n"))
+    } end'
+}
+
+if [[ $1 == show ]]; then
+    id=$(others | jq '.[0].id // empty')
+    [[ -n $id ]] && swaymsg -q "[con_id=$id] scratchpad show"
+    exit
+fi
+
+last=$(status)
+echo "$last"
+# pdeathsig stops swaymsg with this script. Left alone it would wait on sway with nobody reading.
+setpriv --pdeathsig TERM swaymsg -t subscribe -m '["window"]' | while read -r _; do
+    now=$(status)
+    [[ $now == "$last" ]] || echo "$now"
+    last=$now
+done

@@ -6,4 +6,4 @@ set = false
 [templates.waybar]
 input_path = "/home/relz/.config/matugen/templates/waybar-colors.css"
 output_path = "/home/relz/.config/waybar/colors.css"
-post_hook = "killall -SIGUSR2 waybar"
+post_hook = "pkill -USR2 -f '^waybar -b' || true"

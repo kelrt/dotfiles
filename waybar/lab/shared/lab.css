@@ -1,0 +1,79 @@
+/* Shared by all lab bars. Colours come from your matugen output, read-only. */
+@import url("/home/relz/.config/waybar/colors.css");
+
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "Noto Sans", "Font Awesome 6 Free", "Font Awesome 6 Brands", sans-serif;
+    font-size: 13px;
+    min-height: 0;
+}
+
+window#waybar {
+    background: transparent;
+    color: @on_surface;
+}
+
+tooltip {
+    background: alpha(@surface, 0.96);
+    border: 1px solid alpha(@outline, 0.4);
+    border-radius: 10px;
+}
+
+tooltip label {
+    color: @on_surface;
+    padding: 2px 4px;
+}
+
+#workspaces button {
+    padding: 0 8px;
+    background: transparent;
+    color: alpha(@on_surface, 0.7);
+    border-radius: 10px;
+}
+
+#workspaces button.focused {
+    background: @primary;
+    color: @surface;
+    font-weight: bold;
+}
+
+#workspaces button.urgent {
+    background: #eb4d4b;
+    color: #ffffff;
+}
+
+#custom-profile.unmanaged {
+    color: alpha(@on_surface, 0.5);
+}
+
+#custom-profile.power-saver {
+    color: #9ed99b;
+}
+
+#custom-profile.performance {
+    color: #ffb86b;
+}
+
+#custom-charge.on {
+    color: #9ed99b;
+}
+
+#custom-charge.off {
+    color: alpha(@on_surface, 0.55);
+}
+
+#inhibitor.activated,
+#idle_inhibitor.activated {
+    color: #ffb86b;
+}
+
+#privacy-item {
+    color: #eb4d4b;
+    padding: 0 4px;
+}
+
+#systemd-failed-units {
+    color: #eb4d4b;
+    font-weight: bold;
+}

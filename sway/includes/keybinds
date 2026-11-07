@@ -3,7 +3,7 @@ bindsym $mod+Return exec $term
 bindsym $mod+d exec $menu
 bindsym $mod+Shift+q kill
 bindsym $mod+Shift+c reload
-bindsym $mod+Shift+e exec echo -e "Log Out\nSuspend\nReboot\nPower Off" | wofi --dmenu --prompt "Power Menu:" | xargs -I {} sh -c 'case "{}" in "Log Out") swaymsg exit ;; "Suspend") systemctl suspend ;; "Reboot") systemctl reboot ;; "Power Off") systemctl poweroff ;; esac'
+bindsym $mod+Shift+e exec echo -e "Log Out\nSuspend\nReboot\nPower Off" | ~/.config/wofi/menu --dmenu --prompt "Power Menu:" | xargs -I {} sh -c 'case "{}" in "Log Out") swaymsg exit ;; "Suspend") systemctl suspend ;; "Reboot") systemctl reboot ;; "Power Off") systemctl poweroff ;; esac'
 
 bindsym $win+l exec hyprlock
 
@@ -71,7 +71,11 @@ bindsym $mod+r mode "resize"
 ## --- SCREENSHOTS ---
 #Print Screen: Freeze screen, select area, and copy to clipboard
 #bindsym Print exec sh -c '~/.cargo/bin/wayfreeze & PID=$!; sleep 0.2; grim -g "$(slurp)" - | wl-copy; kill $PID'
-bindsym --release Print exec ~/.local/bin/shot-debug.sh
+bindsym Print exec ~/.local/bin/shot-debug.sh
 
 #Right-Control + Print Screen: Freeze screen, select area, and save directly to Downloads
 bindsym Ctrl+Print exec sh -c '~/.cargo/bin/wayfreeze & PID=$!; sleep 0.2; grim -g "$(slurp)" ~/Downloads/screenshot-$(date +%Y-%m-%d-%H%M%S).png; kill $PID'
+
+## --- SIDE BAR ---
+#Show or hide the side bar from the keyboard. Does nothing unless the side bar is running.
+bindsym $mod+x exec pkill -USR1 -f 'python3 .*side/reveal\.py'

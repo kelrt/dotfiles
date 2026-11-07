@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 WALL_DIR="$HOME/Pictures/wallpapers"
-SELECTED=$(ls -1 "$WALL_DIR" | wofi --show dmenu --prompt "Select Wallpaper:" -i)
+SELECTED=$(ls -1 "$WALL_DIR" | ~/.config/wofi/menu --show dmenu --prompt "Select Wallpaper:" -i)
 
 if [ -n "$SELECTED" ]; then
     swaymsg "output * bg '$WALL_DIR/$SELECTED' fill"

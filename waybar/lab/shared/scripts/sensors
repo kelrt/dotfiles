@@ -1,0 +1,45 @@
+#!/bin/bash
+# Waybar module: live package power, temperature, fan and GPU clock.
+# Works on AC too, where the battery reports 0 W. RAPL is readable without root because
+# of /etc/udev/rules.d/99-powercap.rules.
+INTERVAL=3
+RAPL=/sys/class/powercap/intel-rapl:0
+GT=/sys/class/drm/card1/gt_act_freq_mhz
+
+for h in /sys/class/hwmon/hwmon*; do
+    read -r name < "$h/name"
+    case $name in
+    coretemp) TEMP=$h/temp1_input ;;
+    thinkpad) FAN=$h/fan1_input ;;
+    esac
+done
+
+read -r range < "$RAPL/max_energy_range_uj"
+read -r e0 < "$RAPL/energy_uj"
+t0=${EPOCHREALTIME/./}
+
+while :; do
+    sleep "$INTERVAL"
+    read -r e1 < "$RAPL/energy_uj"
+    t1=${EPOCHREALTIME/./}
+    de=$((e1 - e0))
+    ((de < 0)) && de=$((de + range))
+    dt=$((t1 - t0))
+    # uJ per us is watts; keep one decimal
+    tenths=$((dt > 0 ? de * 10 / dt : 0))
+    e0=$e1 t0=$t1
+
+    temp=0 fan=0 gt=0
+    [[ -n $TEMP ]] && read -r temp < "$TEMP"
+    [[ -n $FAN ]] && read -r fan < "$FAN"
+    [[ -r $GT ]] && read -r gt < "$GT"
+    temp=$((temp / 1000))
+
+    class=cool
+    ((temp >= 70)) && class=warm
+    ((temp >= 85)) && class=hot
+
+    text="$((tenths / 10)).$((tenths % 10))W  ${temp}°C  ${fan}rpm"
+    tip="CPU package power: $((tenths / 10)).$((tenths % 10)) W\nPackage temperature: ${temp} °C\nFan: ${fan} rpm\nGPU clock: ${gt} MHz"
+    printf '{"text":"%s","tooltip":"%s","class":"%s"}\n' "$text" "$tip" "$class"
+done

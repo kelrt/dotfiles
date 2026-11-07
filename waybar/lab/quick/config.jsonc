@@ -1,0 +1,162 @@
+// QUICK: the everyday bar other desktops ship with.
+// Hover the sound, light or battery icon to slide out its controls.
+{
+  "layer": "top",
+  "position": "top",
+  "height": 34,
+  "margin-top": 4,
+  "margin-left": 6,
+  "margin-right": 6,
+  "spacing": 4,
+  "reload_style_on_change": true,
+
+  "modules-left": ["sway/workspaces", "sway/mode", "sway/scratchpad", "sway/window"],
+  "modules-center": ["clock", "custom/now-playing"],
+  "modules-right": [
+    "privacy",
+    "custom/reboot",
+    "systemd-failed-units",
+    "group/connect",
+    "group/sound",
+    "group/light",
+    "group/energy",
+    "tray",
+    "custom/power"
+  ],
+
+  "sway/workspaces": { "disable-scroll": true, "all-outputs": true, "format": "{name}" },
+  "sway/scratchpad": {
+    "format": " {count}",
+    "show-empty": false,
+    "tooltip-format": "{app}: {title}"
+  },
+  "sway/window": { "max-length": 50, "tooltip": false, "swap-icon-label": false },
+
+  "clock": {
+    "format": "{:%a %b %d  %H:%M}",
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": {
+      "mode": "month",
+      "format": { "today": "<b><u>{}</u></b>" }
+    },
+    "actions": { "on-click": "shift_down", "on-click-right": "shift_up" }
+  },
+
+  // A separate process, unlike waybar's mpris module, so a player bug cannot crash the bar.
+  "custom/now-playing": {
+    "exec": "playerctl --follow metadata --format '{{ artist }} - {{ title }}'",
+    "exec-if": "command -v playerctl",
+    "restart-interval": 10,
+    "escape": true,
+    "max-length": 40,
+    "tooltip": false,
+    "on-click": "playerctl play-pause",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous"
+  },
+
+  "privacy": {
+    "icon-size": 15,
+    "modules": [{ "type": "screenshare" }, { "type": "audio-in" }]
+  },
+  "custom/reboot": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/reboot-needed",
+    "return-type": "json",
+    "interval": 600
+  },
+  "systemd-failed-units": {
+    "hide-on-ok": true,
+    "format": " {nr_failed}",
+    "system": true,
+    "user": true
+  },
+
+  "group/connect": { "orientation": "horizontal", "modules": ["network", "bluetooth"] },
+  "network": {
+    "format-wifi": " {signalStrength}%",
+    "format-ethernet": "",
+    "format-disconnected": "",
+    "tooltip-format-wifi": "{essid}, {signaldBm} dBm at {frequency} GHz\n{ipaddr}",
+    "tooltip-format-ethernet": "{ifname}\n{ipaddr}",
+    "on-click": "nm-connection-editor"
+  },
+  "bluetooth": {
+    "format": "",
+    "format-disabled": "",
+    "format-off": "",
+    "format-connected": " {num_connections}",
+    "format-connected-battery": " {device_battery_percentage}%",
+    "tooltip-format-connected": "{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}",
+    "tooltip-format-enumerate-connected-battery": "{device_alias}: {device_battery_percentage}%",
+    "on-click": "blueman-manager"
+  },
+
+  "group/sound": {
+    "orientation": "horizontal",
+    "drawer": { "transition-duration": 250, "transition-left-to-right": false },
+    "modules": ["pulseaudio", "pulseaudio/slider"]
+  },
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "",
+    "format-icons": { "default": ["", "", ""], "headphone": "" },
+    "scroll-step": 5,
+    "max-volume": 100,
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-click-right": "pavucontrol"
+  },
+  "pulseaudio/slider": { "min": 0, "max": 100, "orientation": "horizontal" },
+
+  "group/light": {
+    "orientation": "horizontal",
+    "drawer": { "transition-duration": 250, "transition-left-to-right": false },
+    "modules": ["backlight", "backlight/slider"]
+  },
+  "backlight": {
+    "format": " {percent}%",
+    "on-scroll-up": "brightnessctl -q set 5%+",
+    "on-scroll-down": "brightnessctl -q set 5%-"
+  },
+  "backlight/slider": { "min": 1, "max": 100, "orientation": "horizontal" },
+
+  "group/energy": {
+    "orientation": "horizontal",
+    "drawer": { "transition-duration": 250, "transition-left-to-right": false },
+    "modules": ["battery", "custom/profile", "custom/charge", "inhibitor"]
+  },
+  "battery": {
+    "states": { "warning": 20, "critical": 10 },
+    "format": "{icon} {capacity}%",
+    "format-charging": " {capacity}%",
+    "format-plugged": " {capacity}%",
+    "format-icons": ["", "", "", "", ""],
+    "tooltip-format": "{timeTo}\n{power} W, health {health}%, {cycles} cycles"
+  },
+  "custom/profile": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/power-profile",
+    "return-type": "json",
+    "interval": 5,
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/power-profile cycle"
+  },
+  "custom/charge": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/charge-limit",
+    "return-type": "json",
+    "interval": 10,
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/charge-limit toggle"
+  },
+  "inhibitor": {
+    "what": ["idle", "sleep"],
+    "format": "{icon}",
+    "format-icons": { "activated": "", "deactivated": "" },
+    "tooltip-format-activated": "Keeping the laptop awake. Click to allow sleep.",
+    "tooltip-format-deactivated": "Normal sleep. Click to keep awake."
+  },
+
+  "tray": { "icon-size": 16, "spacing": 8 },
+  "custom/power": {
+    "format": "",
+    "tooltip-format": "Lock, suspend, reboot...",
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/power-menu"
+  }
+}

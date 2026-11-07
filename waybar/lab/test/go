@@ -1,0 +1,18 @@
+#!/bin/bash
+# Test the side bar in a private, invisible sway with a simulated pointer. Your session isn't
+# touched, and the bar under test is a copy with its click actions removed.
+#   ~/.config/waybar/lab/test/go           the side bar, about 4 minutes
+#   ~/.config/waybar/lab/test/go popup     the volume/brightness popup, with fake audio, 1 minute
+#   ~/.config/waybar/lab/test/go menu      wofi menus: what keeps them open, what closes them
+#   ~/.config/waybar/lab/test/go battery   power saver at 20%, with a fake battery
+# Prints each check when done. Results and screenshots: $XDG_RUNTIME_DIR/side-bar-test
+H=$(dirname "$(readlink -f "$0")")
+OUT=${XDG_RUNTIME_DIR:-/tmp}/side-bar-test
+mkdir -p "$OUT/bin"
+python3 "$H/make-safe.py" "$OUT" >/dev/null || exit 1
+ln -sf /usr/bin/wofi "$OUT/bin/twofi"   # same program, another name, so pkill can't reach a real menu
+H=$H OUT=$OUT SCENARIO=$H/${1:-hover}-test.sh PATH=$OUT/bin:$PATH timeout 360 env -u WAYLAND_DISPLAY -u SWAYSOCK -u I3SOCK -u DISPLAY \
+    WLR_BACKENDS=headless WLR_RENDERER=pixman WLR_LIBINPUT_NO_DEVICES=1 \
+    sway -c "$H/test.conf" >"$OUT/sway.log" 2>&1
+cat "$OUT/run/results.txt"
+echo "PASS: $(grep -c '^PASS' "$OUT/run/results.txt")  FAIL: $(grep -c '^FAIL' "$OUT/run/results.txt")"

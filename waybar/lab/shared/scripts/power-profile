@@ -1,0 +1,45 @@
+#!/bin/bash
+# Waybar module: show the power profile; a click moves to the next one.
+# Talks to the D-Bus API that both tuned-ppd and power-profiles-daemon provide, because
+# tuned-ppd does not ship powerprofilesctl. With neither installed it only reads what
+# the firmware is doing and explains what to install.
+DEST=net.hadess.PowerProfiles
+OBJ=/net/hadess/PowerProfiles
+PLATFORM=/sys/firmware/acpi/platform_profile
+EPP=/sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference
+LEAF=$'' SCALE=$'' BOLT=$''
+
+current() { busctl --system get-property "$DEST" "$OBJ" "$DEST" ActiveProfile 2>/dev/null | cut -d'"' -f2; }
+
+profile=$(current)
+
+if [[ $1 == cycle ]]; then
+    if [[ -z $profile ]]; then
+        notify-send "Power profile" "Switching needs a profile daemon.\nsudo dnf install tuned-ppd"
+        exit 0
+    fi
+    case $profile in
+    power-saver) next=balanced ;;
+    balanced) next=performance ;;
+    *) next=power-saver ;;
+    esac
+    busctl --system set-property "$DEST" "$OBJ" "$DEST" ActiveProfile s "$next" ||
+        notify-send "Power profile" "Could not switch to $next"
+    exit 0
+fi
+
+read -r platform < "$PLATFORM"
+read -r epp < "$EPP"
+
+if [[ -n $profile ]]; then
+    case $profile in
+    power-saver) icon=$LEAF ;;
+    performance) icon=$BOLT ;;
+    *) icon=$SCALE ;;
+    esac
+    tip="Profile: $profile\nFirmware: $platform\nCPU preference: $epp\nClick for the next profile"
+    printf '{"text":"%s","tooltip":"%s","class":"%s"}\n' "$icon" "$tip" "$profile"
+else
+    tip="No profile daemon, so nothing changes when you unplug\nFirmware: $platform\nCPU preference: $epp\nClick for what to install"
+    printf '{"text":"%s","tooltip":"%s","class":"unmanaged"}\n' "$SCALE" "$tip"
+fi

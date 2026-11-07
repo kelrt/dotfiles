@@ -1,0 +1,31 @@
+#!/bin/bash
+# Waybar module: show whether UPower's battery charge limit is on; a click toggles it.
+# With it on, charging stops at the end threshold (CHARGE_LIMIT in udev), which is kinder to a battery
+# that spends most of its life plugged in. polkit lets the active user do this without a password.
+DEST=org.freedesktop.UPower
+OBJ=/org/freedesktop/UPower/devices/battery_BAT0
+IFACE=org.freedesktop.UPower.Device
+ICON=$'' # three-quarters battery
+
+prop() { busctl --system get-property "$DEST" "$OBJ" "$IFACE" "$1" 2>/dev/null | cut -d' ' -f2; }
+
+enabled=$(prop ChargeThresholdEnabled)
+
+if [[ $1 == toggle ]]; then
+    want=true
+    [[ $enabled == true ]] && want=false
+    if ! busctl --system call "$DEST" "$OBJ" "$IFACE" EnableChargeThreshold b "$want"; then
+        notify-send "Charge limit" "UPower refused the change"
+    fi
+    exit 0
+fi
+
+start=$(prop ChargeStartThreshold)
+end=$(prop ChargeEndThreshold)
+if [[ $enabled == true ]]; then
+    tip="Charge limit on: charges from $start% up to $end%\nClick to allow 100%"
+    printf '{"text":"%s %s%%","tooltip":"%s","class":"on"}\n' "$ICON" "$end" "$tip"
+else
+    tip="Charge limit off: charges to 100%\nClick to stop at $end% (good if you stay plugged in)"
+    printf '{"text":"%s 100%%","tooltip":"%s","class":"off"}\n' "$ICON" "$tip"
+fi
