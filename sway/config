@@ -19,10 +19,14 @@ default_floating_border pixel 1
 smart_gaps on
 
 ### --- OUTPUT CON=+FIGURATION (MONITORS & WALLPAPER) ---
-output * bg /home/relz/Pictures/wallpapers/misty_church.png fill
+# The wallpaper pickers point this link at each new pick, so login shows the picture the bar's
+# colours came from (waybar/scripts/wal_picker.sh and random_wall.sh). If the link is ever
+# missing, the colour at the end is used instead of an error at login.
+output * bg /home/relz/.config/sway/wallpaper fill #202020
 
 output HDMI-A-1 {
-    mode  2560x1440@60Hz
+    # 60 Hz gives this monitor (Gigabyte M27Q X) horizontal lines; 120 Hz is clean.
+    mode  2560x1440@120Hz
     pos 1920 0
     adaptive_sync off
 }
@@ -43,15 +47,19 @@ input type:pointer {
 
 input type:keyboard {
     xkb_layout "us"
-    #comment out the next line when using HHKB
-    #xkb_options "ctrl:swapcaps,altwin:swap_alt_win"
+}
+
+# The laptop's own keyboard: Caps Lock and Ctrl swapped, Alt and Super swapped, to match the HHKB.
+# Only this keyboard gets them, so the HHKB stays as it is and both work at the same time.
+input 1:1:AT_Translated_Set_2_keyboard {
+    xkb_options "ctrl:swapcaps,altwin:swap_alt_win"
 }
 
 
 ### --- STATUS BAR ---
-bar {
-    swaybar_command waybar
-}
+# reveal.py starts waybar and opens and closes it. swaybar_command can't take arguments, so this is
+# a plain exec. The previous bar is in ~/.config/waybar/lab/old.
+exec python3 ~/.config/waybar/reveal.py waybar -c ~/.config/waybar/config.jsonc -s ~/.config/waybar/style.css
 
 ### --- IDLE MANAGEMENT ---
 exec swayidle -w \

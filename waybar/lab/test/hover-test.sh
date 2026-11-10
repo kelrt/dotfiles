@@ -21,11 +21,13 @@ kbd() { echo "$*" >&8; }
 menus() { pgrep -x twofi | wc -l; }
 rust_row() { grim rust.png; set -- $(python3 $H/rows.py rust.png); echo ${10}; }
 walk() { y=$1; shift; for x in "$@"; do ptr abs $x $y; sleep .012; done; }
-start_try() { python3 $H/launch.py $LAB/try > bar.out 2>&1 & TRY=$!; sleep 2.5; REVEAL=$(pgrep -g $TRY -f side/reveal.py); WAYBAR=$(pgrep -g $TRY -x waybar); }
+start_try() { python3 $H/launch.py $LAB/try > bar.out 2>&1 & TRY=$!; sleep 2.5; REVEAL=$(pgrep -g $TRY -f /reveal.py); WAYBAR=$(pgrep -g $TRY -x waybar); }
 gone() { sleep 1; n=$(pgrep -g $TRY | wc -l); [ "$n" = 0 ] && echo gone || { pgrep -ag $TRY | cut -c1-60 >> $R; echo "$n left"; }; }
 # Counts this test's scratchpad watcher processes. They run outside the bar's process group, so gone() can't see them.
 watchers() { n=0; for p in $(pgrep -f 'scratchpad-others|swaymsg -t subscribe'); do grep -qz "^SWAYSOCK=$SWAYSOCK\$" /proc/$p/environ 2>/dev/null && n=$((n+1)); done; echo $n; }
-CLOSE=1.3   # 0.844 s delay, the 0.16 s slide and a margin
+. $H/private-bus.sh
+CLOSE=1.3   # 0.6 s delay, the 0.3 s slide and a margin
+export WOFI=twofi   # reveal.py watches for this name instead of a real menu
 
 swaymsg -q workspace 3; open_win fs; swaymsg -q fullscreen enable
 swaymsg -q workspace 2; open_win two
@@ -88,7 +90,7 @@ swaymsg -q '[title="^other$"] kill'; sleep .4
 say "--- the wait after leaving"
 ptr abs 36 500; sleep .2
 walk 500 60 90 130 200 400; sleep .1; ptr abs 1400 600
-sleep .4; check "still open 0.5 s after leaving" "$(state $CLOSED)" open
+sleep .2; check "still open 0.3 s after leaving" "$(state $CLOSED)" open
 sleep 1.5; check "closed 2 s after leaving" "$(state $CLOSED)" closed
 
 say "--- windows work during the wait"
@@ -109,8 +111,8 @@ check "x=30 clear after it closes" "$(( $(clicks left) - a ))" 1
 ptr abs 1400 600; sleep .2
 
 say "--- coming back"
-ptr abs 0 500; sleep .5; walk 500 40 70 120 300; sleep .5; walk 500 200 120 70 36; sleep .3
-check "back on the bar after 0.5 s" "$(state $CLOSED)" open
+ptr abs 0 500; sleep .5; walk 500 40 70 120 300; sleep .3; walk 500 200 120 70 36; sleep .3
+check "back on the bar after 0.3 s" "$(state $CLOSED)" open
 sleep 2; check "stays open 2 s after coming back" "$(state $CLOSED)" open
 ptr abs 36 $WS2; sleep .2; ptr click left; sleep .35; check "a bar button works right after coming back" "$(cur_ws)" 2
 ptr abs 36 $WS1; sleep .2; ptr click left; sleep .35
@@ -123,7 +125,7 @@ ptr abs 1400 600; sleep .2
 
 say "--- coming back, again and again"
 ok=0
-for i in 05 1 15 2 3 4 5 6; do
+for i in 05 1 15 2 25 3 35 4; do
     ptr abs 0 500; sleep .5
     walk 500 40 70 120 300; sleep .$i; walk 500 200 120 70 36; sleep 1.8
     [ "$(state $CLOSED)" = open ] && ok=$((ok+1))
@@ -182,56 +184,172 @@ swaymsg -q workspace 1; ptr abs 1400 600; sleep .3
 
 say "--- keyboard during the wait"
 ptr abs 0 500; sleep .5; walk 500 40 100 300; sleep .2
-kill -USR1 $REVEAL; sleep .4; check "toggle during the wait closes it now" "$(state $CLOSED)" closed
+kill -USR1 $REVEAL; sleep .6; check "toggle during the wait closes it now" "$(state $CLOSED)" closed
 sleep 2; ptr abs 0 500; sleep .6; check "opens normally after that" "$(state $CLOSED)" open
 ptr abs 1400 600; sleep $CLOSE
 
-say "--- hover sliders (hover only, no clicks or scrolling)"
-VOL=$((TOG-318)); LIGHT=$((TOG-270))
-ptr abs 0 500; sleep .5
-ptr abs 36 $TOG; sleep .3; grim -g "0,640 80x460" 04a.png; CLOSEDROW=$(rust_row)
-ptr click left; sleep .6; grim -g "0,640 80x460" 04b.png
-[ "$(md5sum < 04a.png)" != "$(md5sum < 04b.png)" ] && say "PASS  toggle opens the drawer" || say "FAIL  toggle did not open the drawer"
-OPENROW=$(rust_row)
-say "note: Rust moves $((CLOSEDROW-OPENROW)) px up while the drawer is open"
-ptr abs 36 420; sleep .3; grim -g "0,0 80x1200" 05-base.png   # an empty part of the bar
-ptr abs 36 $VOL; sleep .6; grim -g "0,0 80x1200" 06a.png; sleep .7; grim -g "0,0 80x1200" 06b.png
-check "volume drawer: picture steady, no flicker" "$(md5sum < 06a.png)" "$(md5sum < 06b.png)"
-[ "$(md5sum < 05-base.png)" != "$(md5sum < 06b.png)" ] && say "PASS  volume drawer opened" || say "FAIL  volume drawer did not open"
-grim 06c.png
-ptr abs 36 420; sleep .4
-check "the clock and Rust are back in place after the slider" "$(rust_row)" "$OPENROW"
-ptr abs 1400 600; sleep $CLOSE; check "closes after using the drawers" "$(state $CLOSED)" closed
-ptr abs 0 500; sleep .5; ptr abs 36 $TOG; sleep .3; grim -g "0,640 80x460" 07a.png
-check "drawer is still open next time" "$(md5sum < 07a.png)" "$(md5sum < 04b.png)"
-ptr click left; sleep .6; grim -g "0,640 80x460" 07b.png
-check "toggle closes the drawer" "$(md5sum < 07b.png)" "$(md5sum < 04a.png)"
-check "the clock and Rust are back in the centre once it closes" "$(rust_row)" "$CLOSEDROW"
-ptr abs 1400 600; sleep $CLOSE; check "bar closes with the drawer shut" "$(state $CLOSED)" closed
+say "--- Super on its own"
+ptr abs 1400 600; sleep .3
+kbd super; sleep .6; check "a tap on Super opens the bar" "$(state $CLOSED)" open
+ptr abs 1300 600; sleep $CLOSE; check "it stays open with the pointer away" "$(state $CLOSED)" open
+kbd super; sleep .7; check "another tap closes it" "$(state $CLOSED)" closed
+kbd mod4+d; sleep 1.4; check "Super+d opens the menu and leaves the bar alone" "$(menus) $(state $CLOSED)" "1 closed"
+kbd esc; sleep .6
+kbd superdown; sleep .15; ptr click left; sleep .15; kbd superup; sleep .7
+SC=$(state $CLOSED); say "note: Super held through a mouse click, then let go: the bar is $SC"
+[ "$SC" = open ] && { kbd super; sleep .7; }
+check "closed again" "$(state $CLOSED)" closed
 
-say "--- a menu opened from the bar stays until Esc or a click"
-ptr abs 0 500; sleep .5; ptr abs 36 $TOG; sleep .3; ptr click left; sleep .6
-POWER=$(grim drawer.png; python3 $H/rows.py drawer.png | awk '{print $(NF-4)}'); say "power button y=$POWER"
-ptr abs 36 $POWER; sleep .25; ptr click left; sleep 1.2
+say "--- Super with the calculator, notes and Bitwarden"
+# A tap that closes the bar hides those of the three on screen; the next tap that opens it
+# brings them back. With one on screen and the bar closed, a tap hides it.
+hidden3() { echo "$(in_scratch notes)$(in_scratch calc)$(in_scratch bw)"; }
+kbd super; sleep .6; swaymsg -q '[con_mark="notes"] scratchpad show'; sleep .4
+check "bar open and the notes showing" "$(state $CLOSED) $(hidden3)" "open 011"
+kbd super; sleep .7; check "a tap hides both" "$(state $CLOSED) $(hidden3)" "closed 111"
+kbd super; sleep .7; check "the next tap brings both back, notes focused" "$(state $CLOSED) $(hidden3) $(focused)" "open 011 notes"
+swaymsg -q '[con_mark="calc"] scratchpad show'; sleep .4
+kbd super; sleep .7; check "with calc focused too, a tap hides all of it" "$(state $CLOSED) $(hidden3)" "closed 111"
+kbd super; sleep .7; check "both come back, calc focused as before" "$(state $CLOSED) $(hidden3) $(focused)" "open 001 calc"
+kbd super; sleep .7; check "and away again" "$(state $CLOSED) $(hidden3)" "closed 111"
+swaymsg -q '[con_mark="bw"] scratchpad show'; sleep .4
+kbd super; sleep .7; check "bar closed, Bitwarden showing: a tap hides it, bar stays closed" "$(state $CLOSED) $(hidden3)" "closed 111"
+kbd super; sleep .7; check "the next tap opens the bar with all three, Bitwarden focused" "$(state $CLOSED) $(hidden3) $(focused)" "open 000 bw"
+kbd super; sleep .7; check "one more tap clears all of it" "$(state $CLOSED) $(hidden3)" "closed 111"
+swaymsg -q workspace 3; ptr abs 900 600; sleep .3
+kbd super; sleep .7; check "over fullscreen a tap opens the bar alone" "$(state $CLOSEDFS) $(hidden3) $(focused)" "open 111 fs"
+kbd super; sleep .7; check "and the next closes it" "$(state $CLOSEDFS)" closed
+swaymsg -q workspace 1; ptr abs 1400 600; sleep .3
+kbd super; sleep .7; check "off fullscreen, a tap brings the three back" "$(state $CLOSED) $(hidden3)" "open 000"
+kbd super; sleep .7; check "and a tap clears them" "$(state $CLOSED) $(hidden3)" "closed 111"
+
+say "--- calendar"
+# Counts the pixels of the today marker, a #2b2b2b background only the current month has.
+# The whole width counts: the calendar can open over the bar, and on a Sunday or Monday today's
+# square sits there. The bar has a pixel or so of that colour itself, so another month is "under 20".
+today_px() { grim -g "0,0 964x1200" -t ppm cal.ppm; python3 -c '
+d = open("cal.ppm", "rb").read()
+px = d.split(b"\n", 3)[3]
+print(sum(1 for i in range(0, len(px), 3) if px[i] == px[i + 1] == px[i + 2] == 0x2b))'; }
+cal() { sleep .3; ptr abs $1 $CLOCK; sleep 1.1; }
+ptr abs 0 500; sleep .5; ptr abs 34 $CLOCK; sleep 1.2; NOW=$(today_px); grim cal-now.png
+check "this month: today is highlighted" "$([ "$NOW" -gt 40 ] && echo yes)" yes
+ptr click left; cal 36; BACK=$(today_px); grim cal-back.png
+check "left click: another month, with no today in it" "$([ "$BACK" -lt 20 ] && echo yes)" yes
+ptr click right; cal 34; check "right click: back to this month" "$(today_px)" "$NOW"
+ptr click right; cal 36; NEXT=$(today_px); grim cal-next.png
+check "right click again: the next month" "$([ "$NEXT" -lt 20 ] && echo yes)" yes
+[ "$(md5sum < cal-back.png)" != "$(md5sum < cal-next.png)" ] && say "PASS  left and right go different ways" || say "FAIL  left and right show the same month"
+ptr click left; cal 34; check "left click: back to this month again" "$(today_px)" "$NOW"
+ptr abs 1400 600; sleep $CLOSE
+
+say "--- the slide"
+# Finds where the bar's right edge is, with the closed screen's colour as the base.
+edge() { grim -g "0,500 80x1" -t ppm - | python3 -c '
+import sys
+d = sys.stdin.buffer.read().split(b"\n", 3)[3]
+base = bytes.fromhex(sys.argv[1])
+print(max([x for x in range(80) if sum(abs(d[3 * x + k] - base[k]) for k in range(3)) > 12] + [0]))' $CLOSED; }
+slide() { s=$(date +%s%3N); while :; do n=$(date +%s%3N); e=$(edge); echo "$((n-s)) $e"; [ $((n-s)) -gt 800 ] && break; done; }
+ptr abs 0 500; sleep .8; kill -USR1 $REVEAL; slide > close.txt; sleep .3
+say "closing, ms and edge: $(tr '\n' ',' < close.txt | cut -c1-230)"
+GONE=$(awk '$2 <= 2 { print $1; exit }' close.txt); say "note: closing took about $GONE ms"   # the window border sits at x=0 to 1
+check "closing takes about 0.3 s" "$([ "${GONE:-0}" -ge 220 ] && [ "${GONE:-0}" -le 460 ] && echo yes)" yes
+ptr abs 900 600; sleep .3; ptr abs 0 500; slide > open.txt
+say "opening, ms and edge: $(tr '\n' ',' < open.txt | cut -c1-200)"
+ptr abs 1400 600; sleep $CLOSE
+
+say "--- drawers (no volume changes, the sound button only leaves a mark)"
+# Rows in the second picture with no row near them in the first.
+new_rows() { python3 -c '
+import subprocess, sys
+r = lambda f: [int(x) for x in subprocess.run(["python3", sys.argv[3] + "/rows.py", f], capture_output=True, text=True).stdout.split()]
+a = r(sys.argv[1])
+for y in r(sys.argv[2]):
+    if not any(abs(y - o) < 6 for o in a):
+        print(y)' "$1" "$2" "$H"; }
+rows_of() { python3 $H/rows.py "$1"; }
+above() { rows_of "$1" | tr ' ' '\n' | awk -v l=$LEADER '$1 < l - 6 && $1 > l - 520' | wc -l; }
+vwalk() { for y in $(seq $1 -12 $2); do ptr abs 36 $y; sleep .012; done; ptr abs 36 $2; }   # up the bar, staying on it
+ptr abs 0 500; sleep .5
+ptr abs 36 420; sleep .4; grim -g "8,640 72x460" 04a.png; grim closed.png; CLOSEDROW=$(rust_row)
+ptr abs 36 $TOG; sleep .6; grim -g "8,640 72x460" 04b.png; grim 05-base.png
+[ "$(md5sum < 04a.png)" != "$(md5sum < 04b.png)" ] && say "PASS  hovering the sliders opens the first drawer" || say "FAIL  hovering the sliders did not open the first drawer"
+check "the first drawer alone leaves the clock where it was" "$(rust_row)" "$CLOSEDROW"
+# Alert icons sit above the drawer and ride up with it, so the dots come after them.
+ALERTS=$(rows_of closed.png | tr ' ' '\n' | awk -v r=$RUST -v t=$TOG '$1 > r + 20 && $1 < t - 6' | wc -l)
+LEADER=$(rows_of 05-base.png | tr ' ' '\n' | awk -v r=$RUST '$1 > r + 20' | sed -n "$((ALERTS+1))p"); say "alerts=$ALERTS, dots y=$LEADER"
+[ -n "$LEADER" ] && [ "$LEADER" -gt 620 ] && [ "$LEADER" -lt "$TOG" ] || { say "ABORT: no dots found, no clicks made"; kill $(pgrep -g $TRY); swaymsg exit; exit; }
+vwalk $TOG $LEADER; sleep .4; grim 05b.png
+check "it stays open on the way up to the dots" "$(rows_of 05b.png | tr ' ' '\n' | awk -v l=$LEADER '$1 > l - 6 && $1 < l + 6' | wc -l)" 1
+ptr click left; sleep .7; grim 06a.png; sleep .7; grim 06b.png
+check "second drawer: picture steady, no flicker" "$(md5sum < 06a.png)" "$(md5sum < 06b.png)"
+MORE=$(new_rows 05b.png 06b.png | awk -v l=$LEADER '$1 < l'); say "rows the second drawer added: $(echo $MORE)"
+[ "$(echo "$MORE" | wc -w)" -ge 8 ] && say "PASS  a click on the dots opens the second drawer" || say "FAIL  second drawer did not open"
+check "the dots stay under the pointer" "$(rows_of 06b.png | tr ' ' '\n' | awk -v l=$LEADER '$1 > l - 6 && $1 < l + 6' | wc -l)" 1
+say "note: Rust moves $((CLOSEDROW-$(rust_row))) px up while both drawers are open"
+OPEN=$(above 06b.png)
+# Counted up from the dots: power, Claude, maintenance, wallpaper, keep awake, charge, profile, volume.
+ABOVE=$(rows_of 06b.png | tr ' ' '\n' | awk -v l=$LEADER '$1 < l - 6')
+POWER=$(echo "$ABOVE" | tail -1); VOL=$(echo "$ABOVE" | tail -8 | head -1)
+say "power button y=$POWER, volume y=$VOL"
+ptr abs 36 $POWER; sleep .4; grim 06d.png
+check "both stay open along the second drawer's buttons" "$(above 06d.png)" "$OPEN"
+ptr abs 36 $VOL; sleep .3; ptr click left; sleep .5
+check "left click on the volume opens sound settings" "$(ls sound-settings 2>/dev/null)" sound-settings
+ptr click right; sleep .5
+check "right click on the volume mutes" "$(ls sound-mute 2>/dev/null)" sound-mute
+grim 06e.png; check "those clicks leave both drawers open" "$(above 06e.png)" "$OPEN"
+ptr abs 36 $LEADER; sleep .3; ptr click left; sleep .6; grim 06f.png
+check "a second click on the dots closes the second drawer" "$(rows_of 06f.png)" "$(rows_of 05b.png)"
+ptr click left; sleep .6   # open it again, to see that it stays open
+ptr abs 36 420; sleep .6; grim 06g.png
+check "leaving the drawer closes it" "$(rows_of 06g.png)" "$(rows_of closed.png)"
+check "the clock and Rust are back in the centre once it closes" "$(rust_row)" "$CLOSEDROW"
+ptr abs 1400 600; sleep $CLOSE; check "the bar closes with the pointer away" "$(state $CLOSED)" closed
+ptr abs 0 500; sleep .5; ptr abs 36 $TOG; sleep .6; grim 07a.png
+check "next time, the second drawer is still open" "$(above 07a.png)" "$OPEN"
+ptr abs 1400 600; sleep $CLOSE; check "bar closes again" "$(state $CLOSED)" closed
+
+say "--- a menu opened from the bar stays until Esc or a click, and holds the bar"
+# The second drawer is still open from above, so hovering the sliders shows the power button.
+to_power() { ptr abs 36 $TOG; sleep .5; vwalk $TOG $POWER; sleep .25; ptr click left; sleep 1.2; }
+ptr abs 0 500; sleep .5
+to_power
 check "power button opens the menu" "$(menus)" 1
 walk $POWER 70 100 130 170 210 300; sleep .4
 check "menu stays when the pointer leaves the bar" "$(menus)" 1
 ptr abs 1400 600; sleep .4
 check "menu stays when the pointer crosses onto another window" "$(menus)" 1
-sleep $CLOSE; check "the bar has closed" "$(state $CLOSED)" closed
-check "menu stays after the bar closes" "$(menus)" 1
-kbd esc; sleep .6; check "Esc closes it" "$(menus)" 0
-ptr abs 0 500; sleep .5; ptr abs 36 $POWER; sleep .25; ptr click left; sleep 1.2
+sleep $CLOSE; sleep 1; check "the menu holds the bar open" "$(state $CLOSED)" open
+check "the menu is still there" "$(menus)" 1
+kbd esc; sleep .3; check "Esc closes it" "$(menus)" 0
+check "the bar still waits just after the menu closes" "$(state $CLOSED)" open
+sleep $CLOSE; check "then the bar closes" "$(state $CLOSED)" closed
+
+ptr abs 0 500; sleep .5; to_power
+walk $POWER 70 100 170 300; ptr abs 1400 600; sleep 1.2
+walk $POWER 300 170 100 70 36; sleep .3
+kbd esc; sleep .4; check "Esc with the pointer back on the bar" "$(menus)" 0
+sleep $CLOSE; check "the bar stays while the pointer is on it" "$(state $CLOSED)" open
+walk $POWER 70 100 170 300; ptr abs 1400 600; sleep $CLOSE; check "and closes after it leaves" "$(state $CLOSED)" closed
+
+ptr abs 0 500; sleep .5; to_power
 walk $POWER 70 100 170 300; ptr abs 1400 600; sleep $CLOSE
-a=$(clicks right); ptr click left; sleep .6
+a=$(clicks right); ptr click left; sleep .3
 check "a click on a window closes it" "$(menus)" 0
 say "note: that click also reached the window: $(( $(clicks right) - a )) of 1"
+check "the bar still waits after that click" "$(state $CLOSED)" open
+sleep $CLOSE; check "then the bar closes" "$(state $CLOSED)" closed
 ptr abs 300 600; sleep .4; check "focus follows the pointer again" "$(focused)" left
 ptr abs 1400 600; sleep .4
-ptr abs 0 500; sleep .5; ptr abs 36 $POWER; sleep .25; ptr click left; sleep 1.2
+ptr abs 0 500; sleep .5; to_power
 ptr click left; sleep .8; check "the same button closes it" "$(menus)" 0
-ptr abs 36 $TOG; sleep .3; ptr click left; sleep .6
+ptr abs 36 $LEADER; sleep .3; ptr click left; sleep .6   # shut the second drawer
 ptr abs 1400 600; sleep $CLOSE; check "bar closes after all that" "$(state $CLOSED)" closed
+kbd mod4+d; sleep 1.4; check "\$mod+d opens a menu with the bar closed" "$(menus)" 1
+check "that leaves the bar closed" "$(state $CLOSED)" closed
+kbd esc; sleep .6
 
 say "--- second screen"
 swaymsg -q create_output; sleep 1.5
@@ -258,6 +376,6 @@ ptr abs 1400 600
 start_try; kill -9 $REVEAL; check "helper crash: waybar stops too, no bar left hidden" "$(gone)" gone
 start_try; kill -INT -$TRY; check "Ctrl+C: nothing left running" "$(gone)" gone
 check "Ctrl+C: no scratchpad watcher left" "$(watchers)" 0
-kill $VP $KB 2>/dev/null; exec 9>&- 8>&-
+kill $VP $KB $ITEM $BUS 2>/dev/null; exec 9>&- 8>&-
 say "END"
 swaymsg exit

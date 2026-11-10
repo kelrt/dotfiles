@@ -23,7 +23,19 @@ cat > bin/swaymsg <<X
 #!/bin/sh
 [ ! -e $T/session-ended ]
 X
-chmod +x hold bin/notify-send bin/swaymsg
+# Stand-in for upower: one Bluetooth keyboard whose level is in $T/kb ("gone" when asleep), none
+# while that file is missing, so the real HHKB never takes part.
+cat > bin/upower <<X
+#!/bin/sh
+case \$1 in
+-e) echo /org/freedesktop/UPower/devices/line_power_AC
+    [ -e $T/kb ] && echo /org/freedesktop/UPower/devices/keyboard_dev_TEST ;;
+-i) k=\$(cat $T/kb)
+    if [ "\$k" = gone ]; then pr=no; pc="0% (should be ignored)"; else pr=yes; pc="\$k%"; fi
+    printf '  model:                Test-Keyboard\n  keyboard\n    present:             %s\n    percentage:          %s\n' "\$pr" "\$pc" ;;
+esac
+X
+chmod +x hold bin/notify-send bin/swaymsg bin/upower
 run() { BAT=$T/bat HOLD=$T/hold INTERVAL=0.2 PATH=$T/bin:$PATH sh $HOME/.config/sway/scripts/low-battery.sh & P=$!; }
 
 say "--- the logic"
@@ -42,6 +54,21 @@ level 20 Discharging; check "next time it starts again" "$(starts)" 3
 kill -9 $P; sleep .5; check "script crash: the hold ends too" "$(stops)" 3
 level 15 Discharging; run; sleep .7; check "started on low battery: on straight away" "$(starts)" 4
 touch session-ended; sleep .8; check "session ends: the hold ends too" "$(stops)" 4
+
+say "--- a Bluetooth keyboard's batteries"
+kbw() { grep -c 'Change its batteries' notify.log; }
+kb() { echo "$1" > kb; sleep .7; }
+rm -f session-ended; level 50 Discharging; echo 100 > kb; run; sleep .7
+check "keyboard at 100%: nothing" "$(kbw)" 0
+kb 25; check "25%: nothing" "$(kbw)" 0
+kb 20; check "20%: one warning" "$(kbw)" 1
+check "critical, with its name and level" "$(grep -c '^-u critical -r 9912 Test-Keyboard battery 20% ' notify.log)" 1
+kb 15; kb 10; check "it warns only once" "$(kbw)" 1
+kb gone; kb 10; check "asleep and back, still low: no second warning" "$(kbw)" 1
+kb 100; kb 20; check "new batteries, low again later: warns again" "$(kbw)" 2
+kb 100; kb gone; check "a keyboard that isn't connected never warns" "$(kbw)" 2
+check "the laptop's warnings are untouched" "$(grep -c 'Plug in soon' notify.log | grep -cv '^0$') $(starts)" "1 4"
+kill $P
 
 say "--- the real helper, on a private bus"
 if command -v dbus-run-session >/dev/null; then

@@ -1,0 +1,30 @@
+#!/bin/bash
+# $mod+minus: sway's own "scratchpad show", minus the three apps that have their own keys and bar
+# buttons (marks calc, notes and bw, set in sway/includes/window_rules). Press it again and again to
+# go through the other scratchpad windows: a press hides the one showing, the next shows the next.
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/scratchpad-cycle.lock"
+flock 9   # a spammed key starts this many times; one at a time keeps the order right
+
+tree=$(swaymsg -t get_tree) || exit 1
+ws=$(swaymsg -t get_workspaces | jq -r '.[] | select(.focused) | .name')
+
+# One line per scratchpad window that isn't one of the three: "<id> focused|here|elsewhere|hidden".
+# Hidden ones come in sway's order, and sway moves a window to the back when it hides it.
+list=$(jq -r --arg ws "$ws" '
+    def own: any(.marks[]?; . == "calc" or . == "notes" or . == "bw");
+    ([.. | objects | select(.type? == "workspace" and .name != "__i3_scratch") | . as $w
+      | .. | objects | select((.scratchpad_state? // "none") != "none" and (own | not))
+      | "\(.id) \(if .focused then "focused" elif $w.name == $ws then "here" else "elsewhere" end)"]
+     + [.. | objects | select(.name? == "__i3_scratch") | .floating_nodes[] | select(own | not)
+      | "\(.id) hidden"])[]' <<<"$tree")
+
+pick() { awk -v s="$1" '$2 == s { print $1; exit }' <<<"$list"; }
+if id=$(pick focused) && [[ -n $id ]]; then
+    swaymsg -q "[con_id=$id] scratchpad show"   # showing and focused: hide it
+elif id=$(pick here) && [[ -n $id ]]; then
+    swaymsg -q "[con_id=$id] focus"
+elif id=$(pick elsewhere) && [[ -n $id ]]; then
+    swaymsg -q "[con_id=$id] scratchpad show"   # brings it to this workspace
+elif id=$(pick hidden) && [[ -n $id ]]; then
+    swaymsg -q "[con_id=$id] scratchpad show"
+fi

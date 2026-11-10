@@ -1,0 +1,82 @@
+/* Thunar in the wofi colours. Every rule starts with .thunar, so no other GTK app changes. */
+@define-color cream #eadcc4;
+@define-color cream_light #f4ead8;
+@define-color tan #cdb596;
+@define-color brown #6b4230;
+@define-color brown_dark #3b2519;
+@define-color terracotta #b3623a;
+
+.thunar,
+.thunar .view,
+.thunar treeview.view,
+.thunar iconview,
+.thunar .sidebar,
+.thunar .shortcuts-pane,
+.thunar scrolledwindow,
+.thunar viewport {
+    background-color: @cream_light;
+    color: @brown_dark;
+}
+
+.thunar .sidebar .view,
+.thunar .sidebar treeview.view,
+.thunar .shortcuts-pane treeview.view {
+    background-color: @cream;
+}
+
+.thunar menubar,
+.thunar toolbar,
+.thunar .toolbar,
+.thunar .path-bar,
+.thunar statusbar {
+    background-color: @brown_dark;
+    background-image: none;
+    color: @cream;
+    border-color: @brown;
+}
+
+.thunar menubar > menuitem,
+.thunar toolbar button,
+.thunar .path-bar button,
+.thunar statusbar label {
+    color: @cream;
+    background: none;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.thunar toolbar button:hover,
+.thunar .path-bar button:hover,
+.thunar menubar > menuitem:hover {
+    background-color: @brown;
+    color: @cream_light;
+}
+
+.thunar toolbar entry,
+.thunar .path-bar entry {
+    background-color: @brown;
+    color: @cream_light;
+    border-color: @brown;
+}
+
+.thunar .view:selected,
+.thunar treeview.view:selected,
+.thunar iconview:selected,
+.thunar .view:selected:focus,
+.thunar treeview.view:selected:focus,
+.thunar iconview:selected:focus {
+    background-color: @terracotta;
+    color: @cream_light;
+}
+
+.thunar treeview.view header button {
+    background-color: @cream;
+    background-image: none;
+    color: @brown_dark;
+    border-color: @tan;
+    box-shadow: none;
+}
+
+.thunar paned > separator {
+    background-color: @tan;
+}

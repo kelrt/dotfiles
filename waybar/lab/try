@@ -3,16 +3,19 @@
 #   ~/.config/waybar/lab/try quick    everyday top bar with hover sliders
 #   ~/.config/waybar/lab/try power    bottom bar about energy and heat
 #   ~/.config/waybar/lab/try dock     floating centered dock with app icons
-#   ~/.config/waybar/lab/try side     full bar on the left, hidden until you touch the edge
+#   ~/.config/waybar/lab/try old      your previous main bar, on the right
+#   ~/.config/waybar/lab/try side     your main bar, from a terminal so you can read its log.
+#                                     Stop the running one first or you will have two.
 #   ~/.config/waybar/lab/try osd      just the volume/brightness popup
 # Ctrl+C, or closing the terminal, stops it and leaves no trace.
 LAB=$(dirname "$(readlink -f "$0")")
+BAR=$(dirname "$LAB")   # the main bar's files sit one level up
 
 case $1 in
-quick | power | dock | side) ;;
+quick | power | dock | old | side) ;;
 osd) exec python3 "$LAB/osd/osd.py" ;;
 *)
-    sed -n '2,8p' "$0" | cut -c3-
+    sed -n '2,10p' "$0" | cut -c3-
     exit 2
     ;;
 esac
@@ -25,7 +28,7 @@ if ! pgrep -f 'python3 .*osd/osd\.py' >/dev/null; then
 fi
 
 if [ "$1" = side ]; then
-    python3 "$LAB/side/reveal.py" waybar -c "$LAB/side/config.jsonc" -s "$LAB/side/style.css"
+    python3 "$BAR/reveal.py" waybar -c "$BAR/config.jsonc" -s "$BAR/style.css"
 else
     waybar -c "$LAB/$1/config.jsonc" -s "$LAB/$1/style.css"
 fi

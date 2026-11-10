@@ -1,0 +1,36 @@
+#!/bin/sh
+# The bar's keep-awake button (custom/keep-awake in ../config.jsonc).
+#   keep-awake          print the button's state for waybar
+#   keep-awake toggle   switch it on or off
+# While on, systemd-inhibit holds logind's idle and sleep locks. swayidle obeys the idle one, so
+# there is no screen lock, no screen-off and no suspend from idling. waybar's own inhibitor module
+# did the same, but when a screen was unplugged it closed its shared D-Bus connection, and every
+# click after that failed until the bar restarted. Here the lock is its own process, so screens
+# and bar restarts can't touch it, and it ends within 30 s of sway exiting, so a logged-out laptop
+# can still sleep. KEEP_AWAKE_POLL (seconds) is for the tests.
+PIDFILE=${XDG_RUNTIME_DIR:-/tmp}/keep-awake.pid
+
+on() {  # the pid file names a running systemd-inhibit (not a stale pid reused by something else)
+    pid=$(cat "$PIDFILE" 2>/dev/null) && [ -n "$pid" ] && grep -q systemd-inhibit "/proc/$pid/cmdline" 2>/dev/null
+}
+
+if [ "$1" = toggle ]; then
+    if on; then
+        kill -- "-$pid" 2>/dev/null || kill "$pid"   # its whole group: systemd-inhibit and the loop
+        rm -f "$PIDFILE"
+    else
+        # setsid: its own group, away from the bar's, so a bar restart leaves it running.
+        setsid sh -c 'echo $$ > "$1"; shift; exec "$@"' sh "$PIDFILE" \
+            systemd-inhibit --what=idle:sleep --who="Keep awake" --why="Turned on from the bar" --mode=block \
+            sh -c "while swaymsg -q -t get_version 2>/dev/null; do sleep ${KEEP_AWAKE_POLL:-30}; done" \
+            >/dev/null 2>&1 &
+        sleep .2   # the pid file is written by then
+    fi
+    pkill -RTMIN+9 -x waybar 2>/dev/null   # every bar redraws the button, one per screen
+fi
+
+if on; then
+    echo '{"alt": "activated", "class": "activated", "tooltip": "Keeping the laptop awake: no lock, screen-off or sleep while idle. Click to allow them."}'
+else
+    echo '{"alt": "deactivated", "class": "deactivated", "tooltip": "Normal sleep. Click to keep the laptop awake."}'
+fi

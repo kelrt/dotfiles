@@ -1,0 +1,71 @@
+#!/bin/bash
+# The calculator, notes and Bitwarden: show or hide one, starting it first if it isn't running.
+#   scratch-app calc|notes|bw           $mod+c, $mod+n, $mod+b, and a left click on its bar button
+#   scratch-app calc|notes|bw restart   a right click on its bar button: close it, start it fresh
+# The for_window rules in sway/includes/window_rules mark each new window, float it and put it in
+# the scratchpad, so after a fresh start this shows it.
+# For the tests: SCRATCH_APP_DRY=1 only prints what it would start, and SCRATCH_APP_START_<mark>
+# replaces the command that starts that app.
+mark=$1
+case $mark in
+calc)  name=Calculator; start="$HOME/.cargo/bin/parse" ;;
+notes) name=Notes;      start="mousepad $HOME/Documents/notes.txt" ;;
+bw)    name=Bitwarden;  start="flatpak run com.bitwarden.desktop" ;;
+*)     echo "usage: scratch-app calc|notes|bw [restart]" >&2; exit 2 ;;
+esac
+override=SCRATCH_APP_START_$mark
+start=${!override:-$start}
+
+# One run per app at a time: a second press while the app is starting is dropped, not queued,
+# or it would hide the window the moment it arrives.
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/scratch-app-$mark.lock"
+flock -n 9 || exit 0
+
+window() {  # "<con id> <pid>" of the app's window, or nothing
+    swaymsg -t get_tree | jq -r --arg m "$mark" \
+        'first(.. | objects | select(any(.marks[]?; . == $m)) | "\(.id) \(.pid)") // empty'
+}
+wait_for() {  # wait_for present|gone <seconds>
+    local i
+    for ((i = 0; i < $2 * 5; i++)); do
+        if [[ $1 == present ]]; then [[ -n $(window) ]] && return 0
+        else [[ -z $(window) ]] && return 0; fi
+        sleep .2
+    done
+    return 1
+}
+launch() {
+    if [[ -n $SCRATCH_APP_DRY ]]; then echo "would start: $start"; return; fi
+    notify-send -u low -r 9920 "Starting $name"
+    swaymsg -q exec "$start"   # started by sway, like at login, so it doesn't depend on the bar
+    if wait_for present 20; then
+        swaymsg -q "[con_mark=\"$mark\"] scratchpad show"
+    else
+        notify-send -r 9920 "$name didn't start" "No window came up in 20 seconds."
+    fi
+}
+
+if [[ $2 == restart ]]; then
+    if [[ -n $(window) ]]; then
+        swaymsg -q "[con_mark=\"$mark\"] kill"   # asks it to close, like $mod+Shift+q
+        if ! wait_for gone 5; then
+            case $mark in
+            # Never forced: Mousepad may be asking whether to save, and forcing it would lose the notes.
+            notes) notify-send -r 9920 "Notes is still open" "It may be asking to save. Nothing was restarted."
+                   exit 1 ;;
+            calc)  read -r _ pid <<<"$(window)"; [[ $pid -gt 1 ]] && kill "$pid" ;;
+            # The pid sway reports for a Flatpak app under XWayland can't be trusted outside its sandbox.
+            bw)    flatpak kill com.bitwarden.desktop ;;
+            esac
+            if ! wait_for gone 5; then
+                notify-send -r 9920 "$name didn't close" "Nothing was restarted."
+                exit 1
+            fi
+        fi
+    fi
+    launch
+elif [[ -n $(window) ]]; then
+    swaymsg -q "[con_mark=\"$mark\"] scratchpad show"
+else
+    launch
+fi

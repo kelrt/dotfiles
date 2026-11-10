@@ -27,7 +27,9 @@ for_window [app_id=com.microsoft.VSCode] opacity 0.97
 for_window [class="bitwarden"]  mark bw,   floating enable, resize set 1350 950, move scratchpad
 #for_window [app_id="todoist"]   mark todo, floating enable, resize set 1000 700, move scratchpad
 for_window [app_id="calcpad"]   mark calc, floating enable, resize set 450 550, move scratchpad
-for_window [app_id="mousepad" title="notes\.txt"] mark notes, floating enable, resize set 650 600, move scratchpad
+# tiling: only a newly opened window matches. After each reload sway runs these rules again at
+# a window's next title change, and typing or saving changes Mousepad's, which hid the notes.
+for_window [app_id="mousepad" title="notes\.txt" tiling] mark notes, floating enable, resize set 650 600, move scratchpad
 
 # autolaunch
 exec flatpak run com.bitwarden.desktop
@@ -38,7 +40,7 @@ exec python3 ~/.config/sway/scripts/autotiling.py
 exec mousepad /home/relz/Documents/notes.txt
 
 
-# keys
-bindsym $mod+c [con_mark="calc"]  scratchpad show
-bindsym $mod+n [con_mark="notes"] scratchpad show
-bindsym $mod+b [con_mark="bw"]    scratchpad show
+# keys: show or hide, and start the app first if it isn't running (after a crash, say)
+bindsym $mod+c exec ~/.config/sway/scripts/scratch-app calc
+bindsym $mod+n exec ~/.config/sway/scripts/scratch-app notes
+bindsym $mod+b exec ~/.config/sway/scripts/scratch-app bw

@@ -1,0 +1,19 @@
+#!/bin/bash
+# The bar's music button (custom/music in ../config.jsonc): one line of JSON per change.
+# The text is empty, which hides the button, unless the player you used last is playing or
+# paused with something loaded. Paused gets the class "paused", which style.css dims.
+# playerctld is left out here: it stays on the bus after the last player quits, so following it
+# kept the last song on the bar for good. The bar's clicks still go through playerctld, which
+# acts on the same player, the one you used last.
+# The fields are split on \x1f, not tabs: read merges runs of tabs, which shifted the title into
+# the artist when a player had no artist. pdeathsig stops playerctl along with this script.
+setpriv --pdeathsig TERM playerctl --ignore-player=playerctld --follow metadata \
+    --format $'{{status}}\x1f{{artist}}\x1f{{title}}' 2>/dev/null |
+while IFS=$'\x1f' read -r status artist title; do
+    text= class=
+    if [[ $status == Playing || $status == Paused ]] && [[ -n $title ]]; then
+        text=${artist:+$artist - }$title
+        class=${status,,}
+    fi
+    jq -cn --arg text "$text" --arg class "$class" '{text: $text, class: $class}'
+done

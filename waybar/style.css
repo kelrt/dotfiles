@@ -1,122 +1,196 @@
-@import "colors.css";
+/* Absolute, or reload_style_on_change can't follow it to colors.css and the bar won't recolour. */
+@import url("/home/relz/.config/waybar/lab/shared/lab.css");
 
 * {
-    border: none;
-    font-family: monospace;
-    font-size: 14px;
-    min-height: 0;
+    font-size: 15px;
 }
 
-/* Translucent, color-matched background for the whole bar */
-window#waybar {
-    background-color: alpha(@surface, 0); 
-    color: @on_surface;
-    /*border-left: 1px solid alpha(@outline, 0.3);*/
-    border: none;
+window#waybar > box {
+    margin: 8px 0 8px 8px;
+    padding: 8px 0;
+    background: alpha(@surface, 0.9);
+    border: 1px solid alpha(@outline, 0.3);
+    border-radius: 20px;
+    transition: margin-left 160ms ease-out, margin-right 160ms ease-out, opacity 160ms ease-out;
 }
 
-/* Base pill-shape rule for all bubbles */
-#workspaces, #scratchpad, #mode, #clock, #battery, #pulseaudio, #tray, #idle_inhibitor, #custom-wallpicker, #custom-drawer-toggle, #custom-maintenance, #custom-claude, #custom-rust {
-    border-radius: 16px;
-    padding: 10px 0;
-    margin: 4px 2px;
+/* Closed: slid off the left edge. Both side margins change, or the box would only stretch
+   under its fixed-width window. reveal.py switches between this and the rule above.
+   The transition here is the closing one: a gentle start, and the fade waits until the bar is
+   nearly off the screen, so you see it slide away. The opening one is in the rule above. */
+window#waybar.mode-invisible > box {
+    margin-left: -56px;
+    margin-right: 64px;
+    opacity: 0;
+    transition: margin-left 300ms cubic-bezier(0.4, 0.1, 0.6, 1), margin-right 300ms cubic-bezier(0.4, 0.1, 0.6, 1), opacity 80ms linear 220ms;
 }
 
-/* GROUP 1: Workspaces (Primary Color) */
-#workspaces, #scratchpad, #mode {
-    background-color: alpha(@primary_container, 0.4);
-    border: 1px solid alpha(@primary_container, 0.7);
-    color: @on_primary_container;
+#custom-launcher,
+#custom-scratchpad,
+#mode,
+#custom-rust,
+#custom-drawer-toggle,
+#custom-more,
+#custom-reboot,
+#systemd-failed-units,
+#custom-music,
+#network,
+#pulseaudio,
+#power-profiles-daemon,
+#custom-charge,
+#custom-keep-awake,
+#custom-wallpicker,
+#custom-maintenance,
+#custom-claude,
+#battery,
+#clock,
+#custom-power {
+    padding: 6px 0;
+    margin: 1px 6px;
+    border-radius: 12px;
+}
+
+#custom-launcher:hover,
+#custom-scratchpad:hover,
+#custom-rust:hover,
+#custom-drawer-toggle:hover,
+#custom-more:hover,
+#custom-music:hover,
+#network:hover,
+#pulseaudio:hover,
+#power-profiles-daemon:hover,
+#custom-charge:hover,
+#custom-keep-awake:hover,
+#custom-wallpicker:hover,
+#custom-maintenance:hover,
+#custom-claude:hover,
+#clock:hover,
+#custom-power:hover {
+    background: alpha(@on_surface, 0.12);
+}
+
+#custom-launcher,
+#custom-power {
+    color: @primary;
+}
+
+#custom-launcher {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+/* Workspaces */
+#workspaces {
+    margin: 0 6px;
 }
 
 #workspaces button {
-    padding: 10px 0;
-    background: transparent;
-    color: @on_primary_container;
-    font-weight: bold;
-    border-left: 3px solid transparent;
+    padding: 5px 0;
+    margin: 1px 0;
 }
 
-#workspaces button.focused {
-    background: @primary;
-    color: #000000;
-    font-weight: bold;
-    border-left: 3px solid @primary;
+/* Gaps between clusters */
+#network,
+#power-profiles-daemon,
+#custom-wallpicker,
+#battery {
+    margin-top: 7px;
 }
 
-#workspaces button.urgent {
-    background-color: #eb4d4b;
-    color: #ffffff;
+/* Rust status, same colours as your current bar. GTK can't recolour an emoji, so these are
+   pictures of its shape. The text is a blank that only keeps the module on the bar. */
+#custom-rust {
+    min-height: 26px;
 }
 
-/* GROUP 2: Clock & Drawer (Tertiary Color) */
-#clock, #custom-drawer-toggle {
-    background-color: alpha(@tertiary_container, 0.4);
-    border: 1px solid alpha(@tertiary_container, 0.7);
-    color: @on_tertiary_container;
+#custom-rust.pending,
+#custom-rust.done {
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
-#clock {
-    font-weight: bold;
-    font-size: 18px;
-    text-shadow: none;
-    padding: 8px 4px;
+#custom-rust.pending {
+    background-color: #e01b24;
+    background-image: url("lab/shared/crab-black.png");
 }
 
-/* GROUP 3: Media & Idle (Secondary Color) */
-#mpris, #idle_inhibitor {
-    background-color: alpha(@secondary_container, 0.4);
-    border: 1px solid alpha(@secondary_container, 0.7);
-    color: @on_secondary_container;
+#custom-rust.done {
+    background-image: url("lab/shared/crab-orange.png");
 }
 
-/* GROUP 4: System Info (Surface Variant) */
-#battery, #pulseaudio, #tray {
-    background-color: alpha(@surface_variant, 0.6);
-    border: 1px solid alpha(@outline, 0.4);
-    color: @on_surface;
+/* Scratchpad apps */
+#image {
+    padding: 4px 0;
+    margin: 2px 6px;
+    border-radius: 12px;
 }
 
-#battery.charging, #battery.plugged {
-    color: #26A65B;
+#image.calc {
+    margin-top: 10px;
+}
+
+#image:hover {
+    background: alpha(@on_surface, 0.12);
+}
+
+/* Status and controls */
+#custom-reboot {
+    color: #ffb86b;
+}
+
+#custom-music {
+    color: @tertiary;
+}
+
+/* Paused: dimmed. Stopped or closed, the button isn't on the bar at all (scripts/music). */
+#custom-music.paused {
+    color: alpha(@tertiary, 0.45);
+}
+
+/* Any bigger and "90%" no longer fits the bar. */
+#custom-charge {
+    font-size: 11px;
+}
+
+#tray {
+    margin: 4px 0;
+}
+
+#network.disconnected {
+    color: #eb4d4b;
+}
+
+#network.vpn {
+    color: #9ed99b;
+}
+
+#pulseaudio.muted {
+    color: alpha(@on_surface, 0.5);
+}
+
+#power-profiles-daemon.power-saver {
+    color: #9ed99b;
+}
+
+#power-profiles-daemon.performance {
+    color: #ffb86b;
+}
+
+/* Battery and clock */
+#battery.plugged,
+#battery.charging {
+    color: #9ed99b;
+}
+
+#battery.warning:not(.charging) {
+    color: #ffb86b;
 }
 
 #battery.critical:not(.charging) {
-    background-color: #f53c3c;
-    color: #ffffff;
+    color: #eb4d4b;
 }
 
-/* GROUP 5: Wallpicker Button */
-#custom-wallpicker {
-    background-color: alpha(@primary, 0.4);
-    border: 1px solid alpha(@primary, 0.7);
-    color: @on_primary_container;
+#clock {
+    font-size: 18px;
+    font-weight: bold;
 }
-
-#group-music, #mpris {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-}
-
-#custom-maintenance, #custom-claude {
-    background-color: alpha(@secondary_container, 0.4);
-    border: 1px solid alpha(@secondary_container, 0.7);
-    color: @on_secondary_container;
-}
-
-/* Rust practice module: bright red until today's goal is met */
-#custom-rust.pending {
-    background-color: #e01b24;
-    border: 1px solid #e01b24;
-    color: #000000;
-}
-
-/* Done: same matugen bubble as the Claude button, muted Claude-orange icon */
-#custom-rust.done {
-    background-color: alpha(@secondary_container, 0.4);
-    border: 1px solid alpha(@secondary_container, 0.7);
-    color: #b8765e;
-}
-
-

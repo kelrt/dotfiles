@@ -45,15 +45,27 @@ kb = new(); send(mgr, 0, struct.pack("<II", seat, kb))
 send(kb, 0, struct.pack("<II", 1, len(text)), [fd])
 time.sleep(.3)
 ms = lambda: int(time.monotonic() * 1000) & 0xffffffff
-KEYS = {"d": 32, "esc": 1, "a": 30, "f": 33, "i": 23, "r": 19, "down": 108, "up": 103, "return": 28}
+KEYS = {"esc": 1, "down": 108, "up": 103, "return": 28, " ": 57}
+KEYS.update(zip("qwertyuiop", range(16, 26)))
+KEYS.update(zip("asdfghjkl", range(30, 39)))
+KEYS.update(zip("zxcvbnm", range(44, 51)))
 def key(code, down): send(kb, 1, struct.pack("<III", ms(), code, 1 if down else 0))
 def mods(m): send(kb, 2, struct.pack("<IIII", m, 0, 0, 0))
 print("ready", flush=True)
 for line in sys.stdin:
     p = line.strip()
-    if p.startswith("mod4+"):
+    if p.startswith("text "):
+        for ch in p[5:]:
+            key(KEYS[ch], True); time.sleep(.02); key(KEYS[ch], False); time.sleep(.03)
+    elif p.startswith("mod4+"):
         key(125, True); mods(0x40); time.sleep(.03)
         c = KEYS[p[5:]]; key(c, True); time.sleep(.05); key(c, False); time.sleep(.03)
         mods(0); key(125, False)
+    elif p == "super":  # Super alone, events in the order a real keyboard sends them
+        key(125, True); mods(0x40); time.sleep(.05); key(125, False); mods(0)
+    elif p == "superdown":
+        key(125, True); mods(0x40)
+    elif p == "superup":
+        key(125, False); mods(0)
     elif p in KEYS:
         key(KEYS[p], True); time.sleep(.05); key(KEYS[p], False)

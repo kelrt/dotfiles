@@ -49,7 +49,8 @@ bindsym $mod+Shift+space floating toggle
 bindsym $mod+space focus mode_toggle
 
 bindsym $mod+Shift+minus move scratchpad
-bindsym $mod+minus scratchpad show
+# Like sway's own scratchpad show, but it skips calc, notes and Bitwarden, which have their own keys.
+bindsym $mod+minus exec ~/.config/sway/scripts/scratchpad-cycle
 
 ### --- RESIZING ---
 mode "resize" {
@@ -77,5 +78,11 @@ bindsym Print exec ~/.local/bin/shot-debug.sh
 bindsym Ctrl+Print exec sh -c '~/.cargo/bin/wayfreeze & PID=$!; sleep 0.2; grim -g "$(slurp)" ~/Downloads/screenshot-$(date +%Y-%m-%d-%H%M%S).png; kill $PID'
 
 ## --- SIDE BAR ---
-#Show or hide the side bar from the keyboard. Does nothing unless the side bar is running.
-bindsym $mod+x exec pkill -USR1 -f 'python3 .*side/reveal\.py'
+# Tap Super on its own to show or hide the side bar. --release fires only if no other key was
+# pressed while Super was down. Only the two real keyboards: fcitx5 passes keys on through its own
+# virtual keyboard, and on that copy Super+key would fire this too.
+bindsym --release --input-device=1:1:AT_Translated_Set_2_keyboard Super_L exec pkill -USR1 -f '^python3 .*/reveal\.py'
+# The laptop's right Alt, which sends Super_R with the swaps in sway/config.
+bindsym --release --input-device=1:1:AT_Translated_Set_2_keyboard Super_R exec pkill -USR1 -f '^python3 .*/reveal\.py'
+bindsym --release --input-device=1278:33:HHKB-Hybrid_1_Keyboard Super_L exec pkill -USR1 -f '^python3 .*/reveal\.py'
+bindsym --release --input-device=1278:33:HHKB-Hybrid_1_Keyboard Super_R exec pkill -USR1 -f '^python3 .*/reveal\.py'

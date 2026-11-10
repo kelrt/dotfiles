@@ -1,32 +1,240 @@
+// The main bar: on the left, hidden until you rest the pointer on the screen edge.
+// sway/config starts it through reveal.py, which opens and closes it. The previous bar is in
+// lab/old. Module scripts and the shared CSS are in lab/shared, so keep that folder.
 {
-  "layer": "top",
-  "position": "right",
-  "width": 36,
-  "spacing": 3,
+  "layer": "overlay",
+  "position": "left",
+  "width": 64, // BAR_WIDTH in reveal.py must match
+  "exclusive": false,
+  "spacing": 0,
+  "reload_style_on_change": true,
+
+  // reveal.py sends these signals. "modes" isn't in the man page, but waybar 0.14 reads it.
+  // "invisible" stays drawn so style.css can slide the bar away, and it sits on the top
+  // layer so a hidden bar is never drawn over fullscreen windows.
+  "start_hidden": true,
+  "on-sigusr1": "show",
+  "on-sigusr2": "hide",
+  "mode": "dock",
+  "modes": {
+    "dock": { "layer": "overlay", "exclusive": false, "passthrough": false, "visible": true },
+    "invisible": { "layer": "top", "exclusive": false, "passthrough": true, "visible": true }
+  },
+
   "modules-left": [
+    "custom/launcher",
     "sway/workspaces",
-    "sway/scratchpad",
     "sway/mode",
-    "custom/rust"
+    "image#calc",
+    "image#notes",
+    "image#bitwarden",
+    "custom/scratchpad"
   ],
-  "modules-center": [
-    "clock",
-    "group/drawer",
-    "network#vpn"
-  ],
+  "modules-center": ["clock", "custom/rust", "custom/music"],
+  // Alerts stay outside the drawer. They only appear when there is something to see.
   "modules-right": [
-    "tray",
-    "battery",
-    "group/music"
+    "privacy",
+    "custom/reboot",
+    "systemd-failed-units",
+    "group/drawer",
+    "battery"
   ],
-  "sway/workspaces": {
-    "disable-scroll": true,
-    "all-outputs": true,
-    "format": "{name}",
-    "rotate": 270
+
+  // Hover the sliders to open, leave to close. It opens upward, so the sliders stay under the
+  // pointer. group/more sits at the top of this drawer, so opening it moves nothing else in here.
+  "group/drawer": {
+    "orientation": "inherit",
+    "drawer": { "transition-duration": 220, "transition-left-to-right": false },
+    "modules": ["custom/drawer-toggle", "group/more", "tray"]
+  },
+  // Click the dots for everything else. It stays open until you click them again.
+  "group/more": {
+    "orientation": "inherit",
+    "drawer": { "transition-duration": 220, "transition-left-to-right": false, "click-to-reveal": true },
+    "modules": [
+      "custom/more",
+      "network#vpn",
+      "pulseaudio",
+      "power-profiles-daemon",
+      "custom/charge",
+      "custom/keep-awake",
+      "custom/wallpicker",
+      "custom/maintenance",
+      "custom/claude",
+      "custom/power"
+    ]
+  },
+  "custom/drawer-toggle": {
+    "format": "",
+    "tooltip-format": "Tray and controls"
+  },
+  // No on-click here on purpose: the click has to reach group/more, which opens and closes on it.
+  "custom/more": {
+    "format": "",
+    "tooltip-format": "Click for more"
+  },
+
+  "custom/launcher": {
+    "format": "",
+    "tooltip-format": "Apps",
+    "on-click": "~/.config/wofi/menu --show drun --sort-order alphabetical"
+  },
+  "sway/workspaces": { "disable-scroll": true, "all-outputs": true, "format": "{name}" },
+  // The three scratchpad apps, same as $mod+c, $mod+n and $mod+b. The marks are set in
+  // sway/includes/window_rules. The second line of "exec" is the tooltip. A click shows or hides
+  // the app and starts it first if it isn't running; a right click restarts it
+  // (sway/scripts/scratch-app).
+  "image#calc": {
+    "exec": "printf '%s\\n%s\\n' /usr/share/icons/AdwaitaLegacy/48x48/legacy/accessories-calculator.png 'Calculator. Right-click restarts it'",
+    "size": 28,
+    "on-click": "/home/relz/.config/sway/scripts/scratch-app calc",
+    "on-click-right": "/home/relz/.config/sway/scripts/scratch-app calc restart"
+  },
+  "image#notes": {
+    "exec": "printf '%s\\n%s\\n' /usr/share/icons/hicolor/96x96/apps/org.xfce.mousepad.png 'Notes. Right-click restarts it'",
+    "size": 28,
+    "on-click": "/home/relz/.config/sway/scripts/scratch-app notes",
+    "on-click-right": "/home/relz/.config/sway/scripts/scratch-app notes restart"
+  },
+  "image#bitwarden": {
+    "exec": "printf '%s\\n%s\\n' /var/lib/flatpak/exports/share/icons/hicolor/64x64/apps/com.bitwarden.desktop.png 'Bitwarden. Right-click restarts it'",
+    "size": 28,
+    "on-click": "/home/relz/.config/sway/scripts/scratch-app bw",
+    "on-click-right": "/home/relz/.config/sway/scripts/scratch-app bw restart"
+  },
+  // Empty unless something else is in the scratchpad. Click to bring that window back.
+  "custom/scratchpad": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/scratchpad-others",
+    "return-type": "json",
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/scratchpad-others show"
+  },
+  "sway/mode": { "format": "{}", "rotate": 270 },
+  // The script sends the Rust logo. A blank here hides it, and style.css draws the crab. Colours and tooltip still come from the script's status.
+  "custom/rust": {
+    "exec": "/home/relz/dev/Learning/Rust/tutor/scripts/rust-status.sh",
+    "return-type": "json",
+    "format": " ",
+    "interval": 30,
+    "signal": 8,
+    "on-click": "/home/relz/dev/Learning/Rust/tutor/scripts/rust-session.sh"
+  },
+
+  "privacy": {
+    "icon-size": 15,
+    "modules": [{ "type": "screenshare" }, { "type": "audio-in" }]
+  },
+  "custom/reboot": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/reboot-needed",
+    "return-type": "json",
+    "interval": 600
+  },
+  "systemd-failed-units": {
+    "hide-on-ok": true,
+    "format": " {nr_failed}",
+    "system": true,
+    "user": true
+  },
+  // Below the crab, only while the player you used last is playing or paused with something
+  // loaded; paused is dimmed. scripts/music decides. A separate process, unlike waybar's mpris
+  // module, so a player bug cannot crash the bar. The clicks go through playerctld, which acts
+  // on that same player; plain playerctl takes the first player it finds, which can be a
+  // browser tab instead of Spotify.
+  // Left click: play or pause. Right: next song. Middle: previous. Scrolling skips too.
+  "custom/music": {
+    "exec": "/home/relz/.config/waybar/scripts/music",
+    "return-type": "json",
+    "exec-if": "command -v playerctl",
+    "restart-interval": 10,
+    "format": "",
+    "hide-empty-text": true,
+    "tooltip-format": "{}",
+    "escape": true,
+    "on-click": "playerctl -p playerctld play-pause",
+    "on-click-right": "playerctl -p playerctld next",
+    "on-click-middle": "playerctl -p playerctld previous",
+    "on-scroll-up": "playerctl -p playerctld next",
+    "on-scroll-down": "playerctl -p playerctld previous"
+  },
+  "tray": { "icon-size": 18, "spacing": 8 },
+
+  "network#vpn": {
+    "interface": "vpn-*",
+    "format": "",
+    "format-disconnected": "",
+    "tooltip-format": "{ifname}: {ipaddr}"
+  },
+
+  "pulseaudio": {
+    "format": "{icon}\n<small>{volume}</small>",
+    "format-muted": "\n<small>mute</small>",
+    "format-icons": { "default": ["", "", ""], "headphone": "" },
+    "justify": "center",
+    "scroll-step": 5,
+    "max-volume": 100,
+    "on-click": "pavucontrol",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+  },
+
+  // Click for the next profile. tuned-ppd keeps this up to date, so it needs no polling.
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "tooltip-format": "Power profile: {profile}\nClick for the next one",
+    "format-icons": {
+      "default": "",
+      "performance": "",
+      "balanced": "",
+      "power-saver": ""
+    }
+  },
+  "custom/charge": {
+    "exec": "/home/relz/.config/waybar/lab/shared/scripts/charge-limit",
+    "return-type": "json",
+    "interval": 60,
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/charge-limit toggle"
+  },
+  // Keep awake: no lock, screen-off or sleep while idle. waybar's own inhibitor module stopped
+  // working once a screen was unplugged (it closed a shared D-Bus connection), so this runs
+  // scripts/keep-awake, which holds the lock in a process of its own.
+  "custom/keep-awake": {
+    "exec": "/home/relz/.config/waybar/scripts/keep-awake",
+    "on-click": "/home/relz/.config/waybar/scripts/keep-awake toggle",
+    "return-type": "json",
+    "interval": 60,
+    "signal": 9,
+    "format": "{icon}",
+    "format-icons": { "activated": "", "deactivated": "" }
+  },
+
+  "custom/wallpicker": {
+    "format": "",
+    "tooltip-format": "Left: Wofi menu\nRight: Random wallpaper\nMiddle: Edit wal_tester.sh",
+    "on-click": "/home/relz/.config/waybar/scripts/wal_picker.sh",
+    "on-click-right": "/home/relz/.config/waybar/scripts/random_wall.sh",
+    "on-click-middle": "foot nvim /home/relz/.config/waybar/scripts/wal_picker.sh"
+  },
+  "custom/maintenance": {
+    "format": "",
+    "tooltip-format": "Run DNF, Flatpak, and Push Dotfiles",
+    "on-click": "~/.config/waybar/scripts/maintenance.sh"
+  },
+  "custom/claude": {
+    "format": "",
+    "tooltip-format": "Claude Code in ~/.config",
+    "on-click": "foot -D /home/relz/.config /home/relz/.local/bin/claude"
+  },
+
+  "battery": {
+    "states": { "warning": 20, "critical": 10 },
+    "format": "{icon}\n<small>{capacity}%</small>",
+    "format-charging": "\n<small>{capacity}%</small>",
+    "format-plugged": "\n<small>{capacity}%</small>",
+    "format-icons": ["", "", "", "", ""],
+    "justify": "center",
+    "tooltip-format": "{timeTo}\n{power} W, health {health}%, {cycles} cycles"
   },
   "clock": {
     "format": "{:%H\n%M}",
+    "justify": "center",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>",
     "calendar": {
       "mode": "month",
@@ -38,163 +246,15 @@
         "today": "<span color='#eb4d4b' background='#2b2b2b'><b><u>{}</u></b></span>"
       }
     },
+    // Left click: previous month. Right click: next month. Same as the old bar.
     "actions": {
       "on-click": "shift_down",
       "on-click-right": "shift_up"
     }
   },
-  "group/music": {
-    "orientation": "vertical",
-    "drawer": {
-      "transition-duration": 500,
-      "transition-left-to-right": false
-    },
-    "modules": [
-      "custom/music-icon",
-      "mpris"
-    ]
-  },
-  "sway/scratchpad": {
-    "format": "{icon} {count}",
-    "show-empty": false,
-    "format-icons": [
-      "",
-      ""
-    ],
-    "tooltip": true,
-    "tooltip-format": "{app}: {title}",
-    "rotate": 270
-  },
-  "idle_inhibitor": {
-    "format": "{icon}",
-    "format-icons": {
-      "activated": "",
-      "deactivated": ""
-    }
-  },
-  "custom/music-icon": {
-    "format": "🎵",
-    "tooltip": false
-  },
-  "mpris": {
-    "format": "{dynamic} {status_icon}",
-    "dynamic-order": [
-      "title"
-    ],
-    "tooltip-format": "{title}\nArtist: {artist}\nAlbum: {album}\nTime: {position} / {length}\nPlayer: {player}",
-    "status-icons": {
-      "playing": "⏸",
-      "paused": "▶",
-      "stopped": "⏹"
-    },
-    "max-length": 40,
-    "rotate": 270
-  },
-  "group/drawer": {
-    "orientation": "vertical",
-    "drawer": {
-      "transition-duration": 300,
-      "transition-to-left": true,
-      "click-to-reveal": true
-    },
-    "modules": [
-      "custom/drawer-toggle",
-      "idle_inhibitor",
-      "pulseaudio",
-      "custom/maintenance",
-      "custom/wallpicker",
-      "custom/claude"
-    ]
-  },
-  "custom/drawer-toggle": {
-    "format": "",
-    "tooltip-format": "Click to expand"
-  },
-  "network#vpn": {
-    "interface": "vpn-*",
-    "format": "",
-    "format-disconnected": "",
-    "tooltip-format": "{ifname}: {ipaddr}"
-  },
-  "custom/wallpicker": {
-    "format": "",
-    "tooltip-format": "Left: Wofi menu\nRight: Random wallpaper\nMiddle: Edit wal_tester.sh",
-    "on-click": "/home/relz/.config/waybar/scripts/wal_picker.sh",
-    "on-click-right": "/home/relz/.config/waybar/scripts/random_wall.sh",
-    "on-click-middle": "foot nvim /home/relz/.config/waybar/scripts/wal_picker.sh"
-  },
-  "battery": {
-    "states": {
-      "warning": 30,
-      "critical": 15
-    },
-    "format": "{capacity}% {icon}",
-    "format-full": "{capacity}% {icon}",
-    "format-charging": "{capacity}% ",
-    "format-plugged": "{capacity}% ",
-    "format-alt": "{time} {icon}",
-    "format-icons": [
-      "",
-      "",
-      "",
-      "",
-      ""
-    ],
-    "rotate": 270
-  },
-  "pulseaudio": {
-    "format": "{volume}% {icon} {format_source}",
-    "format-muted": " {format_source}",
-    "format-source": "{volume}% ",
-    "format-source-muted": "",
-    "format-icons": {
-      "headphone": "",
-      "hands-free": "",
-      "headset": "",
-      "phone": "",
-      "portable": "",
-      "car": "",
-      "default": [
-        "",
-        "",
-        ""
-      ]
-    },
-    "on-click": "pavucontrol",
-    "rotate": 270
-  },
-  "power-profiles-daemon": {
-    "format": "{icon}",
-    "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
-    "tooltip": true,
-    "format-icons": {
-      "default": "",
-      "performance": "",
-      "balanced": "",
-      "power-saver": ""
-    }
-  },
-  "tray": {
-    "icon-size": 21,
-    "spacing": 10
-  },
-  "custom/maintenance": {
-    "format": "🛠️",
-    "on-click": "~/.config/waybar/scripts/maintenance.sh",
-    "tooltip": true,
-    "tooltip-format": "Run DNF, Flatpak, and Push Dotfiles"
-  },
-  "custom/claude": {
-    "format": "",
-    "tooltip-format": "Claude Code in ~/.config",
-    "on-click": "foot -D /home/relz/.config /home/relz/.local/bin/claude"
-  },
-  "custom/rust": {
-    "exec": "/home/relz/dev/Learning/Rust/tutor/scripts/rust-status.sh",
-    "return-type": "json",
-    "interval": 30,
-    "signal": 8,
-    "on-click": "/home/relz/dev/Learning/Rust/tutor/scripts/rust-session.sh",
-    "tooltip": true
+  "custom/power": {
+    "format": "",
+    "tooltip-format": "Suspend, reboot...",
+    "on-click": "/home/relz/.config/waybar/lab/shared/scripts/power-menu"
   }
 }

@@ -13,10 +13,22 @@ A Wayland program can't ask where the pointer is, so two invisible surfaces sens
            only over the bar, so your windows work as usual and it sees the pointer come
            back. If the pointer stays away for CLOSE_DELAY_MS, the bar closes.
 
+An open wofi menu holds the bar, so it can't vanish while you read your options. The wait
+starts again when the menu closes.
+
 The edge sits under fullscreen windows, so videos and games never open the bar.
-SIGUSR1 to this process opens the bar from the keyboard. Opened that way it stays open
-until the next SIGUSR1.
+SIGUSR1 to this process opens the bar from the keyboard (sway sends it on a tap of Super).
+Opened that way it stays open until the next SIGUSR1.
+
+The calculator, notes and Bitwarden go with the bar on that tap. A tap that closes the bar also
+hides whichever of them are on screen, and the next tap that opens it brings them back, with
+the one you were in focused again. If one of them is on screen while the bar is closed, the
+tap hides it, so one tap always clears everything away. Over a fullscreen window the bar opens
+alone, because showing one of them there would end the fullscreen; they come back with a
+later tap.
 """
+import json
+import os
 import signal
 import subprocess
 import sys
@@ -31,9 +43,12 @@ from gi.repository import Gdk, GLib, Gtk, GtkLayerShell as Shell  # noqa: E402
 
 BAR_WIDTH = 64  # same as "width" in config.jsonc
 OPEN_DELAY_MS = 120  # passing quickly over the edge doesn't open the bar
-CLOSE_DELAY_MS = 844  # how long the bar stays after the pointer leaves it
+CLOSE_DELAY_MS = 600  # how long the bar stays after the pointer leaves it
+MENU_CHECK_MS = 200  # how often to look again while a menu is holding the bar open
 BAR_SETTLE_MS = 200  # waybar has finished opening by then
 MONITOR_SETTLE_MS = 500  # a new screen's position arrives just after it appears
+MENU = os.environ.get("WOFI", "wofi")  # same variable as ~/.config/wofi/menu, for the tests
+APPS = ("calc", "notes", "bw")  # marks sway/includes/window_rules gives the three scratchpad apps
 
 CLOSED, HOVERED, LEAVING, PINNED = range(4)
 SENSOR_EVENTS = Gdk.EventMask.ENTER_NOTIFY_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK
@@ -42,6 +57,51 @@ ANY_BUTTON = (
 )
 ON_BAR = cairo.Region(cairo.RectangleInt(0, 0, BAR_WIDTH, 1 << 15))
 OFF_BAR = cairo.Region(cairo.RectangleInt(BAR_WIDTH, 0, 1 << 15, 1 << 15))
+
+
+def menu_open():
+    return subprocess.run(["pgrep", "-x", MENU], stdout=subprocess.DEVNULL).returncode == 0
+
+
+def sway(*args):
+    """swaymsg's reply, or None if sway can't be reached."""
+    try:
+        done = subprocess.run(["swaymsg", *args], capture_output=True, text=True, timeout=2)
+        return json.loads(done.stdout)
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+
+
+def nodes(node, workspace=None):
+    """Every node in sway's tree, with the workspace it is on."""
+    if node.get("type") == "workspace":
+        workspace = node
+    yield node, workspace
+    for child in node.get("nodes", []) + node.get("floating_nodes", []):
+        yield from nodes(child, workspace)
+
+
+def apps():
+    """The apps on screen (the focused one last), the apps that are open at all, and whether a
+    fullscreen window covers the focused workspace."""
+    tree = sway("-t", "get_tree")
+    if not isinstance(tree, dict):
+        return [], set(), False
+    everything = list(nodes(tree))
+    here = next((ws for node, ws in everything if node.get("focused")), None)
+    shown, present, fullscreen = [], set(), False
+    for node, ws in everything:
+        if node.get("type") not in ("con", "floating_con"):
+            continue  # sway reports every workspace as fullscreen_mode 1
+        mark = next((m for m in node.get("marks", []) if m in APPS), None)
+        if mark:
+            present.add(mark)
+            if node.get("visible"):
+                shown.append((bool(node.get("focused")), mark))
+        mode = node.get("fullscreen_mode")
+        if mode == 2 or (mode == 1 and ws is here):
+            fullscreen = True
+    return [mark for _, mark in sorted(shown)], present, fullscreen
 
 
 class Reveal:
@@ -53,6 +113,7 @@ class Reveal:
 
         self.state = CLOSED
         self.timer = None
+        self.put_away = []  # apps a tap hid, brought back by the next tap that opens the bar
         self.edges = []
         self.catchers = []
         self.display = Gdk.Display.get_default()
@@ -136,11 +197,23 @@ class Reveal:
         if self.state == HOVERED and not on_bar:
             self.state = LEAVING
             self.watch(ON_BAR)
-            self.after(CLOSE_DELAY_MS, self.close)
+            self.after(CLOSE_DELAY_MS, self.wait_over)
         elif self.state == LEAVING and on_bar:
             self.cancel()
             self.state = HOVERED
             self.watch(OFF_BAR)
+
+    def wait_over(self):
+        if menu_open():
+            self.after(MENU_CHECK_MS, self.check_menu)
+        else:
+            self.close()
+
+    def check_menu(self):
+        if menu_open():
+            self.after(MENU_CHECK_MS, self.check_menu)
+        else:
+            self.after(CLOSE_DELAY_MS, self.wait_over)
 
     def button_released(self):
         if self.state == LEAVING:
@@ -192,10 +265,21 @@ class Reveal:
             win.hide()
 
     def toggle(self):
-        if self.state == CLOSED:
-            self.open(PINNED)
+        shown, present, fullscreen = apps()
+        if self.state != CLOSED or shown:
+            if self.state != CLOSED:
+                self.close()
+            if shown:
+                # The one you were in goes last, so it is focused again when they come back.
+                self.put_away = [m for m in self.put_away if m not in shown] + shown
+                sway("; ".join(f'[con_mark="{m}"] move scratchpad' for m in shown))
         else:
-            self.close()
+            self.open(PINNED)
+            if not fullscreen:
+                back = [m for m in self.put_away if m in present]
+                self.put_away = []
+                if back:
+                    sway("; ".join(f'[con_mark="{m}"] scratchpad show' for m in back))
         return GLib.SOURCE_CONTINUE
 
 
