@@ -39,3 +39,6 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 . "$HOME/.local/bin/env"
+
+# Tools installed under ~/development (see ~/development/README.md)
+[ -f "$HOME/development/flutter-env.sh" ] && source "$HOME/development/flutter-env.sh"

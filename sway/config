@@ -29,12 +29,14 @@ output HDMI-A-1 {
     mode  2560x1440@120Hz
     pos 1920 0
     adaptive_sync off
+    max_render_time 5
 }
 
 output eDP-1 {
     mode 1920x1200@60Hz
     pos 0 0
     adaptive_sync off
+    max_render_time 10
     scale 1
     scale_filter linear
 }
