@@ -190,11 +190,11 @@
     "on-click": "foot -D /home/relz/.config /home/relz/.local/bin/claude"
   },
   "custom/rust": {
-    "exec": "/home/relz/dev/Learning/Rust/tutor/scripts/rust-status.sh",
+    "exec": "/home/relz/code/Learning/Rust/tutor/scripts/rust-status.sh",
     "return-type": "json",
     "interval": 30,
     "signal": 8,
-    "on-click": "/home/relz/dev/Learning/Rust/tutor/scripts/rust-session.sh",
+    "on-click": "/home/relz/code/Learning/Rust/tutor/scripts/rust-session.sh",
     "tooltip": true
   }
 }

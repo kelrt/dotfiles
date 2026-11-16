@@ -3,7 +3,7 @@ bindsym $mod+Return exec $term
 bindsym $mod+d exec $menu
 bindsym $mod+Shift+q kill
 bindsym $mod+Shift+c reload
-bindsym $mod+Shift+e exec echo -e "Log Out\nSuspend\nReboot\nPower Off" | ~/.config/wofi/menu --dmenu --prompt "Power Menu:" | xargs -I {} sh -c 'case "{}" in "Log Out") swaymsg exit ;; "Suspend") systemctl suspend ;; "Reboot") systemctl reboot ;; "Power Off") systemctl poweroff ;; esac'
+bindsym $mod+Shift+e exec ~/.config/waybar/lab/shared/scripts/power-menu
 
 bindsym $win+l exec hyprlock
 

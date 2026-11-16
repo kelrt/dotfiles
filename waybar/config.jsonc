@@ -111,12 +111,12 @@
   "sway/mode": { "format": "{}", "rotate": 270 },
   // The script sends the Rust logo. A blank here hides it, and style.css draws the crab. Colours and tooltip still come from the script's status.
   "custom/rust": {
-    "exec": "/home/relz/dev/Learning/Rust/tutor/scripts/rust-status.sh",
+    "exec": "/home/relz/code/Learning/Rust/tutor/scripts/rust-status.sh",
     "return-type": "json",
     "format": " ",
     "interval": 30,
     "signal": 8,
-    "on-click": "/home/relz/dev/Learning/Rust/tutor/scripts/rust-session.sh"
+    "on-click": "/home/relz/code/Learning/Rust/tutor/scripts/rust-session.sh"
   },
 
   "privacy": {

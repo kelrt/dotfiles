@@ -1,0 +1,27 @@
+#!/bin/sh
+# Default handler for http(s) links (link-router.desktop, set in ~/.config/mimeapps.list).
+# Spotify Jam links go to the Spotify app, which then offers to join; everything else opens in
+# Firefox exactly as before. Firefox is called directly: calling xdg-open here would loop back.
+# A spotify.link short link is fetched once (5 s limit) to see where it leads, because it forwards
+# with JavaScript, not a normal redirect. If that fails, the link just opens in Firefox.
+# OPEN_LINK_DRY=1 prints the command instead of running it (for testing).
+url=$1
+
+run() { if [ -n "$OPEN_LINK_DRY" ]; then echo "$*"; exit 0; else exec "$@"; fi; }
+
+jam_id() {  # prints the session id from an open.spotify.com/socialsession/<id> address
+    id=${1##*/socialsession/}
+    id=${id%%[?#/]*}
+    [ -n "$id" ] && echo "$id"
+}
+
+case $url in
+    http*://open.spotify.com/socialsession/*)
+        id=$(jam_id "$url") && run xdg-open "spotify:socialsession:$id" ;;
+    http*://spotify.link/*|http*://spotify.app.link/*)
+        target=$(curl -sL --max-time 5 -A 'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0' "$url" \
+            | grep -oE 'open\.spotify\.com/socialsession/[A-Za-z0-9]+' | head -n 1)
+        [ -n "$target" ] && id=$(jam_id "$target") && run xdg-open "spotify:socialsession:$id" ;;
+esac
+
+run firefox "$url"
