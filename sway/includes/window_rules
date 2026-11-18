@@ -37,7 +37,7 @@ exec flatpak run com.todoist.Todoist
 exec $HOME/.cargo/bin/parse
 exec python3 ~/.config/sway/scripts/inactive-windows-transparency.py -o 0.96 -g
 exec python3 ~/.config/sway/scripts/autotiling.py
-exec mousepad /home/relz/Documents/notes.txt
+exec mousepad --disable-server /home/relz/Documents/notes.txt
 
 
 # keys: show or hide, and start the app first if it isn't running (after a crash, say)

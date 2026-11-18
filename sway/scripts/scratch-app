@@ -9,7 +9,7 @@
 mark=$1
 case $mark in
 calc)  name=Calculator; start="$HOME/.cargo/bin/parse" ;;
-notes) name=Notes;      start="mousepad $HOME/Documents/notes.txt" ;;
+notes) name=Notes;      start="mousepad --disable-server $HOME/Documents/notes.txt" ;;
 bw)    name=Bitwarden;  start="flatpak run com.bitwarden.desktop" ;;
 *)     echo "usage: scratch-app calc|notes|bw [restart]" >&2; exit 2 ;;
 esac
